@@ -13,3 +13,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 5 | `lib/env` validado + `.env.example` | [M0-etapa-05-env-validado.md](M0-etapa-05-env-validado.md) |
 | 6 | Logger estruturado com redação de PII | [M0-etapa-06-logger.md](M0-etapa-06-logger.md) |
 | 7 | Fronteiras de módulos | [M0-etapa-07-fronteiras-de-modulos.md](M0-etapa-07-fronteiras-de-modulos.md) |
+| 8 | Postgres (Docker), Prisma e papéis de banco | [M0-etapa-08-postgres-prisma-roles.md](M0-etapa-08-postgres-prisma-roles.md) |
