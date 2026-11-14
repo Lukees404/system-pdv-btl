@@ -8,6 +8,7 @@ export const ERROR_CODES = [
   'INVALID_QUANTITY',
   'INVALID_PERCENT',
   'INVALID_ALLOCATION',
+  'INVALID_ENV',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
