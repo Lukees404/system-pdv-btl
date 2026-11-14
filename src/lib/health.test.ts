@@ -33,7 +33,9 @@ describe('checkHealth', () => {
   it('[RNF-SEG-10] o resultado nunca carrega a mensagem do erro nem a URL do banco', async () => {
     const secret = 'postgresql://pdv_app:supersecret@db.exemplo.com:5432/pdv';
 
-    const result = await checkHealth({ ping: () => Promise.reject(new Error(`falha em ${secret}`)) });
+    const result = await checkHealth({
+      ping: () => Promise.reject(new Error(`falha em ${secret}`)),
+    });
 
     expect(JSON.stringify(result)).not.toContain('supersecret');
     expect(Object.keys(result).sort()).toEqual(['db', 'status']);
