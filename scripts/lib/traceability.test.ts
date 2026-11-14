@@ -4,7 +4,48 @@ import {
   extractCitedIds,
   extractDefinedIds,
   formatReport,
+  isScannableTestFile,
+  stripBom,
 } from './traceability';
+
+const BOM = String.fromCharCode(0xfeff);
+
+describe('stripBom', () => {
+  it('[RNF-MAN-05] remove o BOM do início do arquivo (docs salvos no Windows)', () => {
+    expect(stripBom(`${BOM}- **RN-DIN-01** texto`)).toBe('- **RN-DIN-01** texto');
+  });
+
+  it('[RNF-MAN-05] não mexe em texto sem BOM nem em "FEFF" escrito como letras', () => {
+    expect(stripBom('FEFF - **RN-DIN-01**')).toBe('FEFF - **RN-DIN-01**');
+  });
+
+  it('[RNF-MAN-05] o primeiro ID de um doc com BOM continua sendo reconhecido', () => {
+    expect(extractDefinedIds(stripBom(`${BOM}- **RN-DIN-01** texto`))).toEqual(['RN-DIN-01']);
+  });
+});
+
+describe('isScannableTestFile', () => {
+  it.each([
+    'src/lib/env.test.ts',
+    'src/lib/db.int.test.ts',
+    'tests/integration/migrations.int.test.ts',
+    'tests/e2e/smoke.spec.ts',
+    'scripts/lib/other.test.ts',
+  ])('[RNF-MAN-05] varre o arquivo de teste %s', (path) => {
+    expect(isScannableTestFile(path)).toBe(true);
+  });
+
+  it.each([
+    ['src/lib/env.ts', 'não é arquivo de teste'],
+    ['tests/fixtures/boundaries/src/x.test.ts', 'fixtures são código de mentira'],
+    ['node_modules/pacote/a.test.ts', 'dependências'],
+    ['src/generated/prisma/a.test.ts', 'código gerado'],
+    ['.next/server/a.test.ts', 'saída de build'],
+    ['scripts/lib/traceability.test.ts', 'os IDs de exemplo dos testes da própria ferramenta'],
+  ])('[RNF-MAN-05] não varre %s (%s)', (path) => {
+    expect(isScannableTestFile(path)).toBe(false);
+  });
+});
 
 describe('extractDefinedIds', () => {
   it('[RNF-MAN-05] extrai regras no formato de lista do doc 01 (- **RN-XXX-NN** ...)', () => {
@@ -31,6 +72,13 @@ describe('extractDefinedIds', () => {
     ].join('\n');
 
     expect(extractDefinedIds(doc)).toEqual(['RN-VEN-08']);
+  });
+
+  it('[RNF-MAN-05] um ID em negrito no meio da linha é referência, não definição', () => {
+    const doc =
+      'Veja a regra **RN-DIN-03** antes de seguir.\n- Item que cita **RF-CAT-01** no meio.';
+
+    expect(extractDefinedIds(doc)).toEqual([]);
   });
 
   it('[RNF-MAN-05] ignora requisitos não funcionais (RNF), que não entram na regra de rastreio', () => {
@@ -123,7 +171,9 @@ describe('computeTraceability', () => {
       'src/b.test.ts': ['RN-DIN-01'],
     });
 
-    expect(report.covered).toEqual([{ id: 'RN-DIN-01', files: ['src/a.test.ts', 'src/b.test.ts'] }]);
+    expect(report.covered).toEqual([
+      { id: 'RN-DIN-01', files: ['src/a.test.ts', 'src/b.test.ts'] },
+    ]);
   });
 
   it('[RNF-MAN-05] sem nenhum teste, tudo fica descoberto', () => {

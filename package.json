@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "check:boundaries": "depcruise src --config .dependency-cruiser.cjs",
+    "check:traceability": "tsx scripts/check-traceability.ts",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
     "test:int": "vitest run --project integration",
