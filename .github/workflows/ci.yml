@@ -1,0 +1,149 @@
+# CI do PDV Pet Shop. Ordem dos portões: docs/07 §8. Requisitos: RNF-OPS-01, RNF-SEG-06, RNF-SEG-08.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Uma execução por branch/PR: um push novo cancela a anterior.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: 'true'
+  # Credenciais descartáveis do Postgres do próprio CI (mesmas do docker compose local).
+  DATABASE_URL: postgresql://pdv_app:change-me@localhost:5432/pdv
+  DIRECT_URL: postgresql://pdv_owner:change-me@localhost:5432/pdv
+  TEST_DATABASE_URL: postgresql://pdv_app:change-me@localhost:5432/pdv_test
+  TEST_DIRECT_URL: postgresql://pdv_owner:change-me@localhost:5432/pdv_test
+
+jobs:
+  verify:
+    name: Verificar (lint, tipos, testes, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: change-me
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Lint
+        run: pnpm lint
+      - name: Formatação
+        run: pnpm format:check
+      - name: Tipos
+        run: pnpm typecheck
+      - name: Fronteiras de módulos
+        run: pnpm check:boundaries
+      - name: Testes unitários
+        run: pnpm test
+
+      - name: Criar papéis e bancos (mesmo SQL do docker compose)
+        run: psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f docker/initdb/01-roles-and-databases.sql
+        env:
+          PGPASSWORD: change-me
+      - name: Aplicar migrações
+        run: pnpm db:migrate
+      - name: Testes de integração
+        run: pnpm test:int
+
+      - name: Rastreabilidade (informativo)
+        run: pnpm check:traceability
+      - name: Build
+        run: pnpm build
+
+  windows-unit:
+    name: Windows (lint e testes unitários)
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Lint
+        run: pnpm lint
+      - name: Fronteiras de módulos
+        run: pnpm check:boundaries
+      - name: Testes unitários
+        run: pnpm test
+
+  audit:
+    name: Auditoria de dependências
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: pnpm audit (dependências de produção, severidade alta ou maior)
+        run: pnpm audit --prod --audit-level high
+
+  secrets:
+    name: Varredura de segredos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # histórico completo: segredo apagado depois ainda estaria no Git
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: 'false'
+          # Só para repositórios de ORGANIZAÇÃO (conta pessoal não precisa).
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  e2e:
+    name: E2E (Playwright)
+    # E2E só na branch principal, antes do deploy (docs/07 §8).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: change-me
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Criar papéis e bancos
+        run: psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f docker/initdb/01-roles-and-databases.sql
+        env:
+          PGPASSWORD: change-me
+      - name: Aplicar migrações
+        run: pnpm db:migrate
+      - name: Instalar navegador do Playwright
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Testes E2E (build de produção)
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
