@@ -33,11 +33,18 @@ describe('parseEnv', () => {
       parseEnv({});
     } catch (error) {
       expect(error).toMatchObject({ code: 'INVALID_ENV' });
-      expect((error as { details: { variables: string[] } }).details.variables.sort()).toEqual([
+      expect((error as { details: { variables: string[] } }).details.variables).toEqual([
         'DATABASE_URL',
-        'DIRECT_URL',
       ]);
     }
+  });
+
+  it('[RNF-SEG-07] DIRECT_URL é opcional no runtime: só o CLI de migração a usa', () => {
+    // Em produção a aplicação roda só com o usuário de privilégio mínimo (DATABASE_URL);
+    // a credencial do dono do schema não precisa estar no ambiente do servidor.
+    const env = parseEnv({ DATABASE_URL: valid.DATABASE_URL });
+
+    expect(env.DIRECT_URL).toBeUndefined();
   });
 
   it('[RNF-SEG-06] o erro nunca contém o VALOR de uma variável inválida', () => {

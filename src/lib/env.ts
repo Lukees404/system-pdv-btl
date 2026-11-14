@@ -14,7 +14,9 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   DATABASE_URL: postgresUrl,
-  DIRECT_URL: postgresUrl,
+  // Credencial do dono do schema: só o CLI de migração a usa (prisma.config.ts). Opcional
+  // aqui para que o ambiente do servidor em produção não precise carregá-la (RNF-SEG-07).
+  DIRECT_URL: postgresUrl.optional(),
   TEST_DATABASE_URL: postgresUrl.optional(),
   TEST_DIRECT_URL: postgresUrl.optional(),
 });
