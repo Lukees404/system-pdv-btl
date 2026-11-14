@@ -6,4 +6,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 
 | Etapa | Tema | Arquivo |
 |---|---|---|
-| — | (nenhuma nota ainda; a primeira vem ao concluir a Etapa 1) | — |
+| 1 | Esqueleto Next.js + TypeScript estrito | [M0-etapa-01-esqueleto-next.md](M0-etapa-01-esqueleto-next.md) |
