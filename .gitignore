@@ -31,3 +31,7 @@ Thumbs.db
 
 # Claude Code local files
 .claude/settings.local.json
+
+# Gerado pelo `next dev` a cada execução (texto genérico do template). O guia deste
+# projeto é o CLAUDE.md.
+AGENTS.md

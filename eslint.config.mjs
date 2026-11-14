@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'tests/fixtures/**', // código de mentira que viola as fronteiras de propósito
     'src/generated/**', // client do Prisma, gerado
+    'playwright-report/**',
+    'test-results/**',
   ]),
   {
     rules: {
