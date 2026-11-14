@@ -66,7 +66,7 @@ describe('percentOf()', () => {
     [25, 10, 3], // 2,5 → 3 (half-up, não arredondamento bancário)
     [14, 10, 1], // 1,4 → 1
     [16, 10, 2], // 1,6 → 2
-  ])('[RN-DIN-02] percentOf(%i, %i%%) = %i', (subtotal, pct, expected) => {
+  ])('[RN-DIN-02] %i centavos com %i por cento de desconto = %i', (subtotal, pct, expected) => {
     expect(percentOf(money(subtotal), pct)).toBe(expected);
   });
 

@@ -4,10 +4,7 @@
  * Cada marco acrescenta os seus códigos aqui.
  */
 export type ErrorCode =
-  | 'INVALID_MONEY'
-  | 'INVALID_QUANTITY'
-  | 'INVALID_PERCENT'
-  | 'INVALID_ALLOCATION';
+  'INVALID_MONEY' | 'INVALID_QUANTITY' | 'INVALID_PERCENT' | 'INVALID_ALLOCATION';
 
 export class DomainError extends Error {
   readonly code: ErrorCode;
