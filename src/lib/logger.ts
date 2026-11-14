@@ -108,11 +108,25 @@ function sanitize(value: unknown, ancestors: object[], depth: number): unknown {
 
 let appLogger: Logger | undefined;
 
+/**
+ * Nível de log do ambiente. Se a configuração estiver inválida, usa `info`: o logger é
+ * justamente o que precisa funcionar para dizer QUAL variável está errada; ele não pode
+ * ser a primeira coisa a quebrar.
+ */
+function configuredLevel(): LogLevel {
+  try {
+    return getEnv().LOG_LEVEL;
+  } catch (error) {
+    if (error instanceof DomainError && error.code === 'INVALID_ENV') return 'info';
+    throw error;
+  }
+}
+
 /** Logger da aplicação: relógio do sistema, `LOG_LEVEL` do ambiente, saída no console. */
 export function getLogger(): Logger {
   appLogger ??= createLogger({
     clock: new SystemClock(),
-    level: getEnv().LOG_LEVEL,
+    level: configuredLevel(),
     write: (line) => console.log(line),
   });
   return appLogger;
