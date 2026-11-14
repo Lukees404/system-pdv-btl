@@ -8,3 +8,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 |---|---|---|
 | 1 | Esqueleto Next.js + TypeScript estrito | [M0-etapa-01-esqueleto-next.md](M0-etapa-01-esqueleto-next.md) |
 | 2 | Vitest em dois projetos + fast-check | [M0-etapa-02-vitest-dois-projetos.md](M0-etapa-02-vitest-dois-projetos.md) |
+| 3 | `shared/money` (TDD) | [M0-etapa-03-money.md](M0-etapa-03-money.md) |
