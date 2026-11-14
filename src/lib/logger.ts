@@ -1,5 +1,6 @@
-import type { Clock } from '@/shared/clock';
+import { SystemClock, type Clock } from '@/shared/clock';
 import { DomainError } from '@/shared/errors';
+import { getEnv } from './env';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type LogFields = Record<string, unknown>;
@@ -66,17 +67,21 @@ function scrubText(text: string): string {
   return text.replace(/(postgres(?:ql)?:\/\/[^:\s/@]+:)[^@\s]+@/gi, `$1${REDACTED}@`);
 }
 
-function serializeError(error: Error): Record<string, unknown> {
+function serializeError(error: Error, path: object[], depth: number): Record<string, unknown> {
   if (error instanceof DomainError) {
     return {
       name: error.name,
       code: error.code,
-      details: sanitize(error.details, [], 1),
+      details: sanitize(error.details, path, depth + 1),
     };
   }
+  // Erros de driver/rede (pg, Prisma, Node) trazem o motivo real em `code` e em `cause`.
+  const code = (error as { code?: unknown }).code;
   return {
     name: error.name,
     message: scrubText(error.message),
+    ...(typeof code === 'string' ? { code } : {}),
+    ...(error.cause !== undefined ? { cause: sanitize(error.cause, path, depth + 1) } : {}),
     ...(error.stack ? { stack: scrubText(error.stack) } : {}),
   };
 }
@@ -86,11 +91,11 @@ function sanitize(value: unknown, ancestors: object[], depth: number): unknown {
   if (typeof value === 'bigint') return value.toString();
   if (value === null || typeof value !== 'object') return value;
   if (value instanceof Date) return value.toISOString();
-  if (value instanceof Error) return serializeError(value);
   if (ancestors.includes(value)) return '[Circular]';
   if (depth > MAX_DEPTH) return '[MaxDepth]';
 
   const path = [...ancestors, value];
+  if (value instanceof Error) return serializeError(value, path, depth);
   if (Array.isArray(value)) return value.map((item) => sanitize(item, path, depth + 1));
 
   return Object.fromEntries(
@@ -99,6 +104,18 @@ function sanitize(value: unknown, ancestors: object[], depth: number): unknown {
       isSensitiveKey(key) ? REDACTED : sanitize(item, path, depth + 1),
     ]),
   );
+}
+
+let appLogger: Logger | undefined;
+
+/** Logger da aplicação: relógio do sistema, `LOG_LEVEL` do ambiente, saída no console. */
+export function getLogger(): Logger {
+  appLogger ??= createLogger({
+    clock: new SystemClock(),
+    level: getEnv().LOG_LEVEL,
+    write: (line) => console.log(line),
+  });
+  return appLogger;
 }
 
 export function createLogger(options: LoggerOptions): Logger {

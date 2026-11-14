@@ -164,6 +164,37 @@ describe('erros e segredos', () => {
     expect(typeof (parsed()[0]?.error as { stack: unknown }).stack).toBe('string');
   });
 
+  it('[RNF-OBS-01] Error inesperado leva o code (ex.: ECONNREFUSED) para diagnóstico', () => {
+    const { logger, parsed } = setup();
+    const error = Object.assign(new Error('connect falhou'), { code: 'ECONNREFUSED' });
+
+    logger.error('falhou', { error });
+
+    expect(parsed()[0]?.error).toMatchObject({ code: 'ECONNREFUSED' });
+  });
+
+  it('[RNF-OBS-01] Error inesperado leva a causa (cause), também sem segredos', () => {
+    const { logger, lines, parsed } = setup();
+    const url = 'postgresql://pdv_app:supersecret@db.exemplo.com:5432/pdv';
+    const error = new Error('wrapper', { cause: new Error(`causa real em ${url}`) });
+
+    logger.error('falhou', { error });
+
+    expect(parsed()[0]?.error).toMatchObject({ cause: { name: 'Error' } });
+    expect(JSON.stringify(parsed()[0]?.error)).toContain('causa real');
+    expect(lines.join('\n')).not.toContain('supersecret');
+  });
+
+  it('[RNF-SEG-10] ciclo entre causas de erro não derruba o logger', () => {
+    const { logger, parsed } = setup();
+    const a = new Error('a');
+    const b = new Error('b', { cause: a });
+    a.cause = b;
+
+    expect(() => logger.error('x', { error: a })).not.toThrow();
+    expect(parsed()[0]?.error).toMatchObject({ name: 'Error', cause: { cause: '[Circular]' } });
+  });
+
   it('[RNF-SEG-06] a senha de uma URL de banco nunca chega ao log (msg, campos e erros)', () => {
     const { logger, lines } = setup();
     const url = 'postgresql://pdv_app:supersecret@db.exemplo.com:5432/pdv';
