@@ -1,3 +1,7 @@
 allowBuilds:
   sharp: false
   unrs-resolver: false
+  # Scripts de instalação liberados explicitamente (supply chain):
+  prisma: true # CLI do Prisma
+  '@prisma/engines': true # baixa o motor de migrações
+  esbuild: true # usado pelo tsx
