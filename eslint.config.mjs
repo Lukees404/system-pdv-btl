@@ -5,11 +5,36 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'coverage/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'coverage/**',
+    'next-env.d.ts',
+    'tests/fixtures/**', // código de mentira que viola as fronteiras de propósito
+  ]),
   {
     rules: {
       // Sem supressões silenciosas (CLAUDE.md): `any` explícito é erro.
       '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  {
+    // Regra de negócio não lê o relógio do sistema: recebe um `Clock` (ADR-015).
+    // `new Date(valor)` (converter uma data recebida) continua permitido.
+    files: ['src/modules/**/{domain,application}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "NewExpression[callee.name='Date'][arguments.length=0]",
+          message: 'Use o Clock injetado em vez de new Date() (ADR-015).',
+        },
+        {
+          selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          message: 'Use o Clock injetado em vez de Date.now() (ADR-015).',
+        },
+      ],
     },
   },
   {

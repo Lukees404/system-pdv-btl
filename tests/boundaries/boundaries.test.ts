@@ -79,7 +79,7 @@ describe('fronteiras de módulos (dependency-cruiser sobre fixtures)', () => {
         {
           rule: 'domain-has-no-node-core',
           from: 'modules/sales/domain/bad-imports-node-core.ts',
-          to: 'node:fs',
+          to: 'fs', // o cruiser normaliza `node:fs` para `fs`
         },
         {
           rule: 'domain-does-not-depend-on-outer-layers',
@@ -113,27 +113,32 @@ describe('relógio fora do domínio (ESLint)', () => {
   }
 
   it('[ADR-015] new Date() sem argumento é proibido em domain/ e application/', async () => {
-    expect(await ruleIds('src/modules/sales/domain/x.ts', 'export const now = new Date();\n')).toEqual([
-      'no-restricted-syntax',
-    ]);
+    expect(
+      await ruleIds('src/modules/sales/domain/x.ts', 'export const now = new Date();\n'),
+    ).toEqual(['no-restricted-syntax']);
     expect(
       await ruleIds('src/modules/sales/application/x.ts', 'export const now = new Date();\n'),
     ).toEqual(['no-restricted-syntax']);
   });
 
   it('[ADR-015] Date.now() é proibido em domain/ e application/', async () => {
-    expect(await ruleIds('src/modules/sales/domain/x.ts', 'export const now = Date.now();\n')).toEqual([
-      'no-restricted-syntax',
-    ]);
+    expect(
+      await ruleIds('src/modules/sales/domain/x.ts', 'export const now = Date.now();\n'),
+    ).toEqual(['no-restricted-syntax']);
   });
 
   it('[ADR-015] converter uma data recebida (new Date(valor)) é permitido', async () => {
     expect(
-      await ruleIds('src/modules/sales/domain/x.ts', 'export const d = (v: string) => new Date(v);\n'),
+      await ruleIds(
+        'src/modules/sales/domain/x.ts',
+        'export const d = (v: string) => new Date(v);\n',
+      ),
     ).toEqual([]);
   });
 
   it('[ADR-015] o relógio de verdade pode usar new Date() em shared/clock', async () => {
-    expect(await ruleIds('src/shared/clock/clock.ts', 'export const now = new Date();\n')).toEqual([]);
+    expect(await ruleIds('src/shared/clock/clock.ts', 'export const now = new Date();\n')).toEqual(
+      [],
+    );
   });
 }, 60_000);
