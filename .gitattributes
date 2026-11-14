@@ -1,0 +1,11 @@
+# Fim de linha sempre LF no repositório e na cópia de trabalho (Windows e Linux).
+* text=auto eol=lf
+
+# Binários: nunca converter.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pfx binary
+*.woff2 binary

@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# build
+.next/
+out/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# tests
+coverage/
+playwright-report/
+test-results/
+
+# secrets (never commit)
+.env*
+!.env.example
+*.pfx
+*.p12
+*.pem
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Claude Code local files
+.claude/settings.local.json
