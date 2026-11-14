@@ -15,3 +15,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 7 | Fronteiras de módulos | [M0-etapa-07-fronteiras-de-modulos.md](M0-etapa-07-fronteiras-de-modulos.md) |
 | 8 | Postgres (Docker), Prisma e papéis de banco | [M0-etapa-08-postgres-prisma-roles.md](M0-etapa-08-postgres-prisma-roles.md) |
 | 9 | `/api/health` | [M0-etapa-09-health.md](M0-etapa-09-health.md) |
+| 10 | `check-traceability` (informativo) | [M0-etapa-10-rastreabilidade.md](M0-etapa-10-rastreabilidade.md) |
