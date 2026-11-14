@@ -11,3 +11,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 3 | `shared/money` (TDD) | [M0-etapa-03-money.md](M0-etapa-03-money.md) |
 | 4 | Clock, IdGenerator, Result, i18n | [M0-etapa-04-clock-ids-result-i18n.md](M0-etapa-04-clock-ids-result-i18n.md) |
 | 5 | `lib/env` validado + `.env.example` | [M0-etapa-05-env-validado.md](M0-etapa-05-env-validado.md) |
+| 6 | Logger estruturado com redação de PII | [M0-etapa-06-logger.md](M0-etapa-06-logger.md) |
