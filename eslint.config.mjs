@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     'coverage/**',
     'next-env.d.ts',
     'tests/fixtures/**', // código de mentira que viola as fronteiras de propósito
+    'src/generated/**', // client do Prisma, gerado
   ]),
   {
     rules: {

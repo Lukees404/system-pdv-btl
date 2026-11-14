@@ -1,0 +1,11 @@
+// Prisma 7: a URL de conexão vive em prisma.config.ts, não aqui.
+// Sem models no M0; as tabelas chegam a partir do M1.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

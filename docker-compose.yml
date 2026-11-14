@@ -1,0 +1,25 @@
+# Postgres local para desenvolvimento e testes de integração (docs/07 §4).
+# Só aceita conexões da própria máquina (127.0.0.1). Senhas aqui são locais e descartáveis.
+name: pdv
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: change-me
+      POSTGRES_DB: postgres
+    ports:
+      - '127.0.0.1:54329:5432'
+    volumes:
+      - pdv_pgdata:/var/lib/postgresql/data
+      # Executado só na primeira criação do volume: cria papéis e bancos.
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pdv_pgdata:

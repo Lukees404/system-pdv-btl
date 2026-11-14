@@ -8,6 +8,9 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
+# Prisma client gerado (recriado por `prisma generate`, no postinstall e no build)
+/src/generated/
+
 # tests
 coverage/
 playwright-report/

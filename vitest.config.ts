@@ -23,8 +23,11 @@ export default defineConfig({
           name: 'integration',
           include: ['src/**/*.int.test.ts', 'tests/**/*.int.test.ts'],
           exclude: ['**/node_modules/**'],
-          // Um arquivo por vez: os testes compartilham o mesmo banco.
+          // Um arquivo por vez: os testes compartilham o mesmo servidor de banco.
           fileParallelism: false,
+          globalSetup: ['./tests/global-setup.ts'],
+          testTimeout: 30_000,
+          hookTimeout: 60_000,
         },
       },
     ],

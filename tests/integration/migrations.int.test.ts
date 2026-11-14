@@ -1,10 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  createIsolatedDatabase,
-  migrateDeploy,
-  query,
-  type IsolatedDatabase,
-} from '../helpers/db';
+import { createIsolatedDatabase, migrateDeploy, query, type IsolatedDatabase } from '../helpers/db';
 
 type MigrationRow = {
   migration_name: string;

@@ -9,3 +9,5 @@ docs
 estudos
 CLAUDE.md
 tests/fixtures
+src/generated
+prisma/migrations

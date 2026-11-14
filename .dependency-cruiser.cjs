@@ -94,6 +94,7 @@ module.exports = {
     // Conta também `import type`: a fronteira vale para tipos.
     tsPreCompilationDeps: true,
     doNotFollow: { path: 'node_modules' },
+    exclude: { path: '^src/generated' }, // client do Prisma, gerado
     tsConfig: { fileName: 'tsconfig.json' },
   },
 };
