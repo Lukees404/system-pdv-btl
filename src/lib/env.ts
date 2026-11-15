@@ -49,3 +49,11 @@ export function getEnv(): Env {
   cached ??= parseEnv(process.env);
   return cached;
 }
+
+/**
+ * Só `NODE_ENV`, sem validar o resto: o `proxy.ts` roda em toda requisição e não pode falhar
+ * (nem exigir banco) por causa de outra variável.
+ */
+export function isDevelopment(): boolean {
+  return process.env.NODE_ENV === 'development';
+}
