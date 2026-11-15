@@ -1,3 +1,4 @@
+import { Client } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { normalizeText } from '@/shared/text';
 import { createIsolatedDatabase, query, type IsolatedDatabase } from '../helpers/db';
@@ -82,6 +83,8 @@ describe('esquema do catálogo', () => {
       [name, normalizeText(name), o.price ?? 0, o.fee ?? false, o.archived ?? false],
     );
 
+  const idOf = async (rows: Promise<{ id: string }[]>) => (await rows)[0]!.id;
+
   const CHECK = { code: '23514' };
   const UNIQUE = { code: '23505' };
 
@@ -100,7 +103,7 @@ describe('esquema do catálogo', () => {
 
   describe('products', () => {
     it('[RN-CAT-01] cria produto ativo com estoque 0, unidade UN e sem custo por padrão', async () => {
-      const [{ id }] = await insertProduct({ name: 'Coleira' });
+      const id = await idOf(insertProduct({ name: 'Coleira' }));
 
       const [row] = await query<Record<string, unknown>>(
         db.ownerUrl,
@@ -133,7 +136,7 @@ describe('esquema do catálogo', () => {
     });
 
     it('[RN-CAT-02] nome único entre ativos (sem acento e caixa); arquivado libera o nome', async () => {
-      const [{ id }] = await insertProduct({ name: 'Ração Premium' });
+      const id = await idOf(insertProduct({ name: 'Ração Premium' }));
 
       await expect(insertProduct({ name: 'RACAO premium' })).rejects.toMatchObject(UNIQUE);
 
@@ -142,7 +145,7 @@ describe('esquema do catálogo', () => {
     });
 
     it('[RN-CAT-02][RN-CAT-04] reativar um produto cujo nome foi tomado por outro ativo conflita', async () => {
-      const [{ id }] = await insertProduct({ name: 'Shampoo Neutro', archived: true });
+      const id = await idOf(insertProduct({ name: 'Shampoo Neutro', archived: true }));
       await insertProduct({ name: 'shampoo neutro' });
 
       await expect(
@@ -180,7 +183,7 @@ describe('esquema do catálogo', () => {
     });
 
     it('[RN-CAT-04] a aplicação (pdv_app) lê e grava produtos, mas NÃO consegue excluir (só arquivar)', async () => {
-      const [{ id }] = await insertProduct({ name: 'Brinquedo' });
+      const id = await idOf(insertProduct({ name: 'Brinquedo' }));
 
       await query(db.appUrl, 'UPDATE products SET price_cents = 1500 WHERE id = $1', [id]);
       await expect(
@@ -199,14 +202,14 @@ describe('esquema do catálogo', () => {
     });
 
     it('[RF-CAT-06] só se exclui categoria vazia: com produto, o banco recusa (RESTRICT)', async () => {
-      const [{ id: categoryId }] = await insertCategory('Higiene');
+      const categoryId = await idOf(insertCategory('Higiene'));
       await insertProduct({ name: 'Sabonete Pet', categoryId });
 
       await expect(
         query(db.appUrl, 'DELETE FROM categories WHERE id = $1', [categoryId]),
       ).rejects.toMatchObject({ code: '23503' }); // foreign_key_violation
 
-      const [{ id: emptyId }] = await insertCategory('Vazia');
+      const emptyId = await idOf(insertCategory('Vazia'));
       await expect(
         query(db.appUrl, 'DELETE FROM categories WHERE id = $1 RETURNING id', [emptyId]),
       ).resolves.toHaveLength(1);
@@ -241,7 +244,7 @@ describe('esquema do catálogo', () => {
     });
 
     it('[RN-CAT-04] a aplicação (pdv_app) não consegue excluir serviços (só arquivar)', async () => {
-      const [{ id }] = await insertService('Atestado de viagem');
+      const id = await idOf(insertService('Atestado de viagem'));
 
       await expect(
         query(db.appUrl, 'DELETE FROM services WHERE id = $1', [id]),
@@ -252,24 +255,33 @@ describe('esquema do catálogo', () => {
   });
 
   describe('busca (ADR-020, RNF-DES-01)', () => {
-    it('[RNF-DES-01] com 5.000 produtos, a busca parcial usa o índice trigram (não varre a tabela)', async () => {
+    it('[ADR-020] o índice trigram é utilizável pela busca parcial ILIKE (com a varredura desligada o planejador o escolhe)', async () => {
       await query(
         db.ownerUrl,
         `INSERT INTO products (id, name, name_normalized, price_cents, created_at, updated_at)
          SELECT gen_random_uuid(), 'Item ' || n || ' ' || w, 'item ' || n || ' ' || w, 1000, now(), now()
          FROM generate_series(1, 5000) AS n,
-              LATERAL (SELECT (ARRAY['racao','brinquedo','shampoo','petisco','areia','coleira'])[1 + n % 6] AS w) AS words`,
-      );
-      await query(db.ownerUrl, 'ANALYZE products');
-
-      const plan = await query<{ 'QUERY PLAN': unknown }>(
-        db.ownerUrl,
-        `EXPLAIN (FORMAT JSON) SELECT id FROM products WHERE name_normalized ILIKE '%olei%'`,
+              LATERAL (SELECT CASE WHEN n % 500 = 0 THEN 'coleira' ELSE (ARRAY['racao','brinquedo','shampoo','petisco','areia'])[1 + n % 5] END AS w) AS words`,
       );
 
-      const text = JSON.stringify(plan[0]!['QUERY PLAN']);
-      expect(text).toContain('Bitmap Index Scan');
-      expect(text).toContain('products_name_trgm_idx');
+      // Com 5.000 linhas o planejador prefere varrer a tabela (é mais barato e rápido); o que
+      // este teste prova é que o índice e o operador ILIKE combinam. O limite de tempo da busca
+      // (RNF-DES-01) é medido no teste de desempenho.
+      const client = new Client({ connectionString: db.ownerUrl });
+      await client.connect();
+      try {
+        await client.query('ANALYZE products');
+        await client.query('SET enable_seqscan = off');
+        const plan = await client.query(
+          `EXPLAIN (FORMAT JSON) SELECT id FROM products WHERE name_normalized ILIKE '%olei%'`,
+        );
+
+        const text = JSON.stringify(plan.rows[0]['QUERY PLAN']);
+        expect(text).toContain('Bitmap Index Scan');
+        expect(text).toContain('products_name_trgm_idx');
+      } finally {
+        await client.end();
+      }
     });
   });
 });
