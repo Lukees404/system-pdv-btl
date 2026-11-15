@@ -110,8 +110,7 @@ jobs:
 
   e2e:
     name: E2E (Playwright)
-    # E2E só na branch principal, antes do deploy (docs/07 §8).
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # E2E em todo PR (portão antes do merge) e na branch principal antes do deploy (docs/07 §8).
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 30
