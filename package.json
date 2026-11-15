@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm check:boundaries && pnpm test",
     "check:boundaries": "depcruise src --config .dependency-cruiser.cjs",
     "check:traceability": "tsx scripts/check-traceability.ts",
     "test": "vitest run --project unit",
