@@ -1,5 +1,6 @@
 import type { AuditLog } from '@/modules/audit';
 import type { ErrorCode } from '@/shared/errors';
+import type { ProductData } from '../domain/product';
 
 export type CategoryRecord = {
   id: string;
@@ -43,9 +44,40 @@ export interface CategoryRepository {
   list(): Promise<CategoryRecord[]>;
 }
 
+/** `stockQty` é cache do livro de estoque (M3): o catálogo só lê, nunca escreve (ADR-007). */
+export type ProductRecord = ProductData & {
+  id: string;
+  stockQty: number;
+  archivedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ProductSearchQuery = {
+  /** Texto já normalizado (`normalizeText`); vazio = listar tudo. */
+  normalizedTerm: string;
+  /** Texto original aparado, para comparar com o código de barras. */
+  barcode: string;
+  includeArchived: boolean;
+  limit: number;
+  offset: number;
+};
+
+export interface ProductRepository {
+  /** Lança `PRODUCT_NAME_TAKEN`, `BARCODE_TAKEN` ou `CATEGORY_NOT_FOUND` (restrições do banco). */
+  create(product: ProductData & { id: string; now: Date }): Promise<void>;
+  /** Mesmos conflitos do `create`. NÃO toca em `stock_qty`, `archived_at` nem `created_at`. */
+  update(id: string, product: ProductData, now: Date): Promise<void>;
+  findById(id: string): Promise<ProductRecord | null>;
+  /** `null` reativa; reativar com nome já tomado por outro ativo lança `PRODUCT_NAME_TAKEN`. */
+  setArchived(id: string, archivedAt: Date | null, now: Date): Promise<void>;
+  search(query: ProductSearchQuery): Promise<ProductRecord[]>;
+}
+
 /** Repositórios e auditoria ligados à MESMA transação do banco. */
 export type CatalogUnitOfWorkContext = {
   categories: CategoryRepository;
+  products: ProductRepository;
   audit: AuditLog;
 };
 
