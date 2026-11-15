@@ -10,7 +10,8 @@ import {
 } from './lockout';
 
 const now = new Date('2026-03-10T15:00:00.000Z');
-const minutesAfter = (date: Date | null) => (date ? (date.getTime() - now.getTime()) / 60_000 : null);
+const minutesAfter = (date: Date | null) =>
+  date ? (date.getTime() - now.getTime()) / 60_000 : null;
 
 describe('parâmetros do bloqueio', () => {
   it('[RN-ACE-05] bloqueia a partir da 5ª falha, base de 15 min e teto de 60 min (OQ-28)', () => {
@@ -21,9 +22,12 @@ describe('parâmetros do bloqueio', () => {
 });
 
 describe('computeLockedUntil', () => {
-  it.each([0, 1, 2, 3, 4])('[RN-ACE-05][RNF-SEG-03] com %i falhas seguidas não bloqueia', (failures) => {
-    expect(computeLockedUntil(failures, now)).toBeNull();
-  });
+  it.each([0, 1, 2, 3, 4])(
+    '[RN-ACE-05][RNF-SEG-03] com %i falhas seguidas não bloqueia',
+    (failures) => {
+      expect(computeLockedUntil(failures, now)).toBeNull();
+    },
+  );
 
   it.each([
     [5, 15],

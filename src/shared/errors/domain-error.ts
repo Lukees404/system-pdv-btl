@@ -10,6 +10,8 @@ export const ERROR_CODES = [
   'INVALID_ALLOCATION',
   'INVALID_ENV',
   'AUDIT_PII_FORBIDDEN',
+  'WEAK_PASSWORD',
+  'INVALID_EMAIL',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

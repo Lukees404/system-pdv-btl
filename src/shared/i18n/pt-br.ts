@@ -11,6 +11,8 @@ export const errorMessages: Record<ErrorCode, string> = {
   INVALID_ALLOCATION: 'Não foi possível ratear o valor entre os itens.',
   INVALID_ENV: 'A configuração do sistema está incompleta ou inválida.',
   AUDIT_PII_FORBIDDEN: 'A auditoria não pode registrar dados pessoais.',
+  WEAK_PASSWORD: 'A senha deve ter entre 10 e 128 caracteres.',
+  INVALID_EMAIL: 'Informe um e-mail válido.',
 };
 
 export const messages = {

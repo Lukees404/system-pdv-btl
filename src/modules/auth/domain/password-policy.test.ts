@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validatePassword } from './password-policy';
 
-const codeOf = (result: ReturnType<typeof validatePassword>) => (result.ok ? null : result.error.code);
+const codeOf = (result: ReturnType<typeof validatePassword>) =>
+  result.ok ? null : result.error.code;
 
 describe('validatePassword', () => {
   it('[RN-ACE-05] os limites são 10 e 128 caracteres', () => {
