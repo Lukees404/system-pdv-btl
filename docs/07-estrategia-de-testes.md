@@ -80,7 +80,7 @@ Onde TDD estrito **não** se aplica: estilo visual, layout, textos e código de 
 
 ## 8. Portões de qualidade (CI)
 
-Em todo PR, nesta ordem: instalar → `lint` → `typecheck` → `check:boundaries` → testes unitários → migrações no banco de teste → testes de integração → `check:traceability` → build. E2E em PRs que tocam telas críticas e na branch principal antes do deploy. Piso de cobertura **somente no domínio** (≥ 90% de ramos, como alarme, não como meta); sem piso para telas.
+Em todo PR, nesta ordem: instalar → `lint` → `typecheck` → `check:boundaries` → testes unitários → migrações no banco de teste → testes de integração → `check:traceability` → build. E2E em **todo PR** (a suíte é curta, ~1 min, e só o PR verde pode ser mesclado) e de novo na branch principal antes do deploy; se a suíte crescer a ponto de atrasar o fluxo, restringir aos PRs que tocam telas críticas. Piso de cobertura **somente no domínio** (≥ 90% de ramos, como alarme, não como meta); sem piso para telas.
 
 ## 9. Definition of Done (por tarefa)
 
