@@ -131,8 +131,8 @@ Cada regra tem ID estável. Origem: `[Confirmado]` `[Pesquisa]` `[Decisão]` `[S
 - **RN-ACE-01** `[Confirmado]` Acesso somente autenticado; os 2 usuários têm permissões iguais. A tabela de usuários tem `role` (hoje todos `OWNER`) para evolução futura.
 - **RN-ACE-02** `[Decisão]` Auditoria (`audit_log`) registra: venda finalizada, devolução, entrada/ajuste/perda de estoque, abertura/fechamento de caixa, suprimento/sangria, alteração de preço/custo, arquivamento/reativação, importação, anonimização, criação de usuário, troca de senha.
 - **RN-ACE-03** `[Decisão]` `audit_log` é **append-only** (o usuário do banco da aplicação não tem `UPDATE`/`DELETE`) e **sem dados pessoais** (apenas IDs e diferenças de valores não pessoais).
-- **RN-ACE-04** `[Suposição OQ-17]` Sessão persistente por 30 dias no dispositivo; trocar a senha invalida as demais sessões.
-- **RN-ACE-05** `[Decisão]` Senha com ≥ 10 caracteres; hash com argon2id (ou bcrypt); bloqueio temporário após 5 falhas seguidas (RNF-SEG-03).
+- **RN-ACE-04** `[Suposição OQ-17]` Sessão persistente por 30 dias no dispositivo; trocar a senha invalida as demais sessões. `[Suposição OQ-28]` A sessão é **absoluta** (expira 30 dias após o login, sem renovação a cada acesso) e **revogável no servidor**: sair e trocar a senha a removem; desativar o usuário a invalida.
+- **RN-ACE-05** `[Decisão]` Senha com ≥ 10 caracteres; hash com argon2id (ou bcrypt); bloqueio temporário após 5 falhas seguidas (RNF-SEG-03). `[Suposição OQ-28]` Senha de 10 a 128 caracteres (o teto evita abuso do hash); a partir da 5ª falha seguida o acesso fica bloqueado por `15 min × 2^(falhas − 5)`, no máximo 60 min; um login correto zera o contador; a tela mostra a **mesma mensagem** para credencial errada e conta bloqueada (não revela se o e-mail existe).
 - **RN-ACE-06** `[Decisão]` Usuários são criados pelo desenvolvedor (script/admin), sem autocadastro.
 
 ## 13. Preparação fiscal (RN-FIS) — Fase 1

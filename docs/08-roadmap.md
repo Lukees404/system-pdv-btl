@@ -7,7 +7,7 @@ Marcos pequenos, cada um **testável e utilizável**. Tamanho: `S` pequeno, `M` 
 | Marco | Nome | Tam. | Status |
 |---|---|---|---|
 | M0 | Fundação | M | ☑ concluído em 15/11/2026 (ver "Execução do M0") |
-| M1 | Autenticação e auditoria | M | ☐ |
+| M1 | Autenticação e auditoria | M | ◐ em andamento (iniciado em 15/11/2026) |
 | M2 | Catálogo (categorias, produtos, serviços) | M | ☐ |
 | M3 | Estoque (livro de movimentos) | M | ☐ |
 | M4 | Importação de planilha | M | ☐ |
@@ -40,7 +40,7 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 - **Cobertura de regras no fim do M0:** `check:traceability` mostra 4 de 154 (`RN-DIN-01`, `02`, `03`, `05`).
 
 ## M1 — Autenticação e auditoria
-**Escopo:** RF-AUT-01…04; módulo `audit`; tabela `users`; sessões; limitação de tentativas; script `create-user`; casca da aplicação (layout, navegação mobile/desktop); escolha da biblioteca de auth (ADR-011).
+**Escopo:** RF-AUT-01…04; módulo `audit`; tabela `users`; sessões; limitação de tentativas; script `create-user`; casca da aplicação (layout, navegação mobile/desktop); ADR-011 decidido: implementação própria (ver `04`); parâmetros de segurança em `OQ-28`. **Antes de migrar a produção:** desligar a Data API do Supabase (`docs/runbooks/deploy-preview.md` §6).
 **Regras:** RN-ACE-01…06, RNF-SEG-01…05/07.
 **Testes primeiro:** login válido/inválido, bloqueio após 5 falhas, troca de senha invalida sessões, rotas protegidas retornam 401/403, `audit_log` sem `UPDATE/DELETE`, nenhum dado pessoal em auditoria.
 **Saída:** é possível entrar, sair e trocar a senha; ações auditadas.

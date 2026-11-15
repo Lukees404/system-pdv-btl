@@ -28,7 +28,10 @@ erDiagram
 ## Tabelas
 
 ### users
-`id`, `name`, `email` (único, `citext` ou normalizado), `password_hash`, `role` (`OWNER`), `active` bool, `failed_attempts` int, `locked_until` timestamptz null, `created_at`, `updated_at`. Sessões em tabela própria conforme a biblioteca de auth (ADR-011).
+`id`, `name`, `email` (**normalizado** com `trim` e minúsculas, com índice único; sem `citext`), `password_hash`, `role` (`OWNER`, com `CHECK`), `active` bool, `failed_attempts` int (`CHECK ≥ 0`, padrão 0), `locked_until` timestamptz null, `created_at`, `updated_at`. O bloqueio por tentativas usa `failed_attempts` e `locked_until` (RN-ACE-05); o contador é incrementado por `UPDATE` atômico no banco.
+
+### sessions
+`id`, `user_id` FK `users`, `token_hash` (SHA-256 em hex do token; **único**; o token em claro só existe no cookie do navegador), `created_at`, `expires_at` (= criação + 30 dias, RN-ACE-04). Índice em `user_id`. Sem dados pessoais. Uma linha é apagada ao sair (RF-AUT-02) e todas as demais do usuário são apagadas ao trocar a senha (RF-AUT-03).
 
 ### categories
 `id`, `name`, `name_normalized` (único), `created_at`.
@@ -108,7 +111,7 @@ Constraint: `HOME_VISIT` exige `customer_id` e `service_address`; `COMPLETED` ex
 `id`, `user_id`, `file_name`, `file_sha256`, `total_rows`, `created_count`, `updated_count`, `skipped_count`, `error_count`, `created_at`. Índice em `file_sha256`.
 
 ### audit_log
-`id` bigint identity, `user_id` null, `action` text, `entity_type` text, `entity_id` text null, `data` jsonb (**sem dados pessoais**), `created_at`. Append-only. Índices `(entity_type, entity_id)`, `(created_at)`.
+`id` bigint identity, `user_id` null, `action` text, `entity_type` text, `entity_id` text null, `data` jsonb (**sem dados pessoais**; `CHECK` de que é um objeto JSON), `created_at`. Append-only: a migração faz `REVOKE UPDATE, DELETE, TRUNCATE` do papel da aplicação (RN-ACE-03). Índices `(entity_type, entity_id)`, `(created_at)`.
 
 ### outbox (Fase 2)
 `id`, `type`, `payload` jsonb, `created_at`, `processed_at` null, `attempts` int. Escrita na mesma transação da venda.

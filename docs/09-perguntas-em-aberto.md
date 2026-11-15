@@ -48,6 +48,8 @@ Cada item tem uma **suposição padrão**: se a pergunta ainda não foi respondi
 |---|---|---|---|---|
 | OQ-17 | Sessão persistente de 30 dias é aceitável (celulares compartilhados)? | RN-ACE-04 | 30 dias | Aberta |
 | OQ-21 | Qual provedor de emissão e orçamento mensal (Focus NFe, NFE.io ou outro)? Cobre NFC-e **e** NFS-e Nacional? | M11 | Avaliar na M11 com critérios de `06` | Aberta |
+| OQ-28 | Parâmetros de segurança da autenticação que os docs não fixam: duração do bloqueio, tamanho máximo da senha, tipo de expiração da sessão e mensagem de erro. | RN-ACE-04/05, RNF-SEG-03 | Sessão **absoluta** de 30 dias; senha de 10 a 128 caracteres; bloqueio a partir da 5ª falha seguida por `15 min × 2^(falhas − 5)` com teto de 60 min; mesma mensagem para credencial errada e conta bloqueada | Aberta (M1) |
+| OQ-29 | Esqueci a senha: o sistema não envia e-mail. Como um dono redefine a própria senha? | RF-AUT-03, RN-ACE-06 | Fora do M1; o desenvolvedor redefine por script (a criar); avaliar no M10 | Aberta |
 | OQ-24 | Hospedagem e custo mensal-alvo de infraestrutura? | RNF-OPS-04, ADR-005 | Planos gratuitos/baratos (Vercel + Supabase) | Aberta |
 
 ## Suposições globais (registro)
