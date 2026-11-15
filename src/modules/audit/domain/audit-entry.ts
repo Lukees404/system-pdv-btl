@@ -3,10 +3,21 @@ import { DomainError } from '@/shared/errors';
 import { isSensitiveKey } from '@/shared/pii';
 
 /**
- * Ações auditáveis (RN-ACE-02). O catálogo cresce a cada marco: hoje só as do M1;
- * venda, estoque, caixa etc. entram junto com os seus módulos.
+ * Ações auditáveis (RN-ACE-02), no padrão `entidade.verbo`. O catálogo cresce a cada marco:
+ * M1 (usuários) e M2 (preço/custo alterado, arquivar e reativar produtos e serviços);
+ * venda, estoque, caixa etc. entram junto com os seus módulos. Os nomes são gravados no banco:
+ * nunca renomear uma ação já registrada.
  */
-export const AUDIT_ACTIONS = ['user.created', 'user.password_changed'] as const;
+export const AUDIT_ACTIONS = [
+  'user.created',
+  'user.password_changed',
+  'product.price_changed',
+  'product.archived',
+  'product.reactivated',
+  'service.price_changed',
+  'service.archived',
+  'service.reactivated',
+] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
 export type AuditEntryInput = {

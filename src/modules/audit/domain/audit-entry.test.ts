@@ -43,6 +43,60 @@ describe('buildAuditEntry', () => {
     expect(AUDIT_ACTIONS).toContain('user.password_changed');
   });
 
+  it('[RN-ACE-02] o catálogo inclui preço/custo alterado e arquivar/reativar de produto e serviço', () => {
+    expect(AUDIT_ACTIONS).toEqual(
+      expect.arrayContaining([
+        'product.price_changed',
+        'product.archived',
+        'product.reactivated',
+        'service.price_changed',
+        'service.archived',
+        'service.reactivated',
+      ]),
+    );
+  });
+
+  it('[RN-ACE-02] toda ação segue o padrão entidade.verbo e não se repete (nomes são estáveis no banco)', () => {
+    for (const action of AUDIT_ACTIONS) expect(action).toMatch(/^[a-z]+\.[a-z_]+$/);
+    expect(new Set(AUDIT_ACTIONS).size).toBe(AUDIT_ACTIONS.length);
+  });
+
+  it('[RN-ACE-03][RN-CAT-05] preço/custo anterior e novo (centavos) e ids são aceitos, sem dado pessoal', () => {
+    const entry = buildAuditEntry(
+      {
+        userId: 'u1',
+        action: 'product.price_changed',
+        entityType: 'product',
+        entityId: 'p1',
+        data: {
+          before: { priceCents: 1000, costCents: null },
+          after: { priceCents: 1250, costCents: 700 },
+        },
+      },
+      clock,
+    );
+
+    expect(entry.data).toEqual({
+      before: { priceCents: 1000, costCents: null },
+      after: { priceCents: 1250, costCents: 700 },
+    });
+  });
+
+  it('[RN-ACE-03] a auditoria do catálogo rejeita dado pessoal embutido no payload', () => {
+    expect(() =>
+      buildAuditEntry(
+        {
+          userId: 'u1',
+          action: 'service.archived',
+          entityType: 'service',
+          entityId: 's1',
+          data: { serviceId: 's1', customer: { phone: '9299999' } },
+        },
+        clock,
+      ),
+    ).toThrow(expect.objectContaining({ code: 'AUDIT_PII_FORBIDDEN' }));
+  });
+
   it('[RN-ACE-03] aceita IDs e diferenças de valores não pessoais', () => {
     expect(() =>
       buildAuditEntry(
