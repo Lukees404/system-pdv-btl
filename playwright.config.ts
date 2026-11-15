@@ -8,6 +8,10 @@ export default defineConfig({
   testDir: 'tests/e2e',
   testMatch: '**/*.spec.ts',
   fullyParallel: true,
+  // Local usa `next dev`, que compila cada rota na primeira visita; com muitos workers a CPU
+  // (argon2 dos logins + compilação) estoura os prazos. No CI o build de produção não sofre disso.
+  workers: isCI ? undefined : 2,
+  expect: { timeout: 10_000 },
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
   reporter: isCI ? [['list'], ['html', { open: 'never' }]] : 'list',
