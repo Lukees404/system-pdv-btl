@@ -7,6 +7,25 @@ import { FakePasswordHasher } from './infrastructure/fake-password-hasher';
 import { FakeSessionTokens } from './infrastructure/fake-session-tokens';
 import { PrismaUnitOfWork } from './infrastructure/prisma-unit-of-work';
 
+/** Cookies em memória: registra o que as ações gravam e apagam. Só para testes. */
+export class FakeCookieJar {
+  readonly values = new Map<string, string>();
+  readonly setCalls: { name: string; value: string; options: Record<string, unknown> }[] = [];
+  readonly deleteCalls: string[] = [];
+
+  get(name: string): string | undefined {
+    return this.values.get(name);
+  }
+  set(name: string, value: string, options: Record<string, unknown>): void {
+    this.values.set(name, value);
+    this.setCalls.push({ name, value, options });
+  }
+  delete(name: string): void {
+    this.values.delete(name);
+    this.deleteCalls.push(name);
+  }
+}
+
 /**
  * Apoio dos testes de integração dos casos de uso: banco isolado e migrado, relógio e ids
  * falsos, hasher rápido (e o argon2 real quando o teste precisa dele). Só para testes.
