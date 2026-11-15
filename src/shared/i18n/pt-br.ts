@@ -28,4 +28,30 @@ export const errorMessages: Record<ErrorCode, string> = {
 
 export const messages = {
   'app.name': 'PDV Pet Shop',
+  'app.skipToContent': 'Ir para o conteúdo',
+
+  'nav.label': 'Navegação principal',
+  'nav.home': 'Início',
+  'nav.account': 'Conta',
+
+  'home.title': 'Início',
+  'home.greeting': 'Olá, {name}.',
+
+  'auth.login.title': 'Entrar',
+  'auth.login.email': 'E-mail',
+  'auth.login.password': 'Senha',
+  'auth.login.submit': 'Entrar',
+  'auth.login.submitting': 'Entrando…',
+
+  'account.title': 'Conta',
+  'account.changePassword.title': 'Trocar senha',
+  'account.changePassword.hint':
+    'Use de 10 a 128 caracteres. Os outros aparelhos serão desconectados.',
+  'account.changePassword.current': 'Senha atual',
+  'account.changePassword.new': 'Nova senha',
+  'account.changePassword.confirm': 'Confirmar nova senha',
+  'account.changePassword.submit': 'Trocar senha',
+  'account.changePassword.submitting': 'Trocando…',
+  'account.changePassword.success': 'Senha alterada. Os outros aparelhos foram desconectados.',
+  'account.logout': 'Sair',
 } as const;

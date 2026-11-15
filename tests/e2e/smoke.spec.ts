@@ -12,11 +12,14 @@ test('[RNF-OBS-03] /api/health responde 200 com o banco no ar', async ({ request
   expect(await response.json()).toEqual({ status: 'ok', db: 'up' });
 });
 
-test('[RNF-COM-02] a home mostra o nome do app e não rola na horizontal', async ({ page }) => {
+test('[RNF-COM-02][RNF-SEG-04] sem sessão a raiz leva ao login, que não rola na horizontal', async ({
+  page,
+}) => {
   await page.goto('/');
 
+  await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('heading', { name: t('app.name') })).toBeVisible();
-  await expect(page).toHaveTitle(t('app.name'));
+  await expect(page).toHaveTitle(`${t('auth.login.title')} · ${t('app.name')}`);
 
   const overflowsHorizontally = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
