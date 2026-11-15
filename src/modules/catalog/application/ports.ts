@@ -1,6 +1,7 @@
 import type { AuditLog } from '@/modules/audit';
 import type { ErrorCode } from '@/shared/errors';
 import type { ProductData } from '../domain/product';
+import type { ServiceData } from '../domain/service';
 
 export type CategoryRecord = {
   id: string;
@@ -74,10 +75,35 @@ export interface ProductRepository {
   search(query: ProductSearchQuery): Promise<ProductRecord[]>;
 }
 
+export type ServiceRecord = ServiceData & {
+  id: string;
+  archivedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/** Campos editáveis: a marca de taxa de deslocamento NÃO muda depois de criada (RN-SER-03). */
+export type ServiceUpdate = Pick<
+  ServiceData,
+  'name' | 'nameNormalized' | 'priceCents' | 'fiscalServiceCode'
+>;
+
+export interface ServiceRepository {
+  /** Lança `SERVICE_NAME_TAKEN` ou `DISPLACEMENT_FEE_EXISTS` (restrições do banco). */
+  create(service: ServiceData & { id: string; now: Date }): Promise<void>;
+  /** Lança `SERVICE_NAME_TAKEN` se outro serviço ativo já tiver o nome normalizado. */
+  update(id: string, service: ServiceUpdate, now: Date): Promise<void>;
+  findById(id: string): Promise<ServiceRecord | null>;
+  /** `null` reativa; reativar com nome já tomado por outro ativo lança `SERVICE_NAME_TAKEN`. */
+  setArchived(id: string, archivedAt: Date | null, now: Date): Promise<void>;
+  list(options: { includeArchived: boolean }): Promise<ServiceRecord[]>;
+}
+
 /** Repositórios e auditoria ligados à MESMA transação do banco. */
 export type CatalogUnitOfWorkContext = {
   categories: CategoryRepository;
   products: ProductRepository;
+  services: ServiceRepository;
   audit: AuditLog;
 };
 

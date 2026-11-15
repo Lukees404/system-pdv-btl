@@ -106,36 +106,49 @@ describe('serviços (banco real)', () => {
 
   describe('updateService', () => {
     it('[RF-CAT-07] edita nome, preço e código fiscal; a marca de taxa de deslocamento não muda', async () => {
-      const fee = await create({
-        name: 'Taxa Editável',
-        priceCents: 3000,
-        isDisplacementFee: false,
-      });
-      const feeId = await create({ name: 'Taxa Real', priceCents: 3000, isDisplacementFee: true });
+      // Banco próprio: a taxa de deslocamento é única e o banco compartilhado já tem a sua.
+      const localKit = await createCatalogTestKit();
+      try {
+        const actor = { actorUserId: localKit.actorUserId };
+        const make = async (input: Parameters<typeof createService>[1]) => {
+          const result = await createService(localKit.deps, input);
+          return result.ok ? result.value.id : (null as never);
+        };
+        const common = await make({ name: 'Serviço Editável', priceCents: 3000 });
+        const fee = await make({ name: 'Taxa Real', priceCents: 3000, isDisplacementFee: true });
 
-      await updateService(kit.deps, {
-        id: fee,
-        actorUserId: kit.actorUserId,
-        name: 'Consulta Domiciliar',
-        priceCents: 9000,
-        fiscalServiceCode: ' 08.01 ',
-      });
-      await updateService(kit.deps, {
-        id: feeId,
-        actorUserId: kit.actorUserId,
-        name: 'Taxa Real',
-        priceCents: 3500,
-      });
+        await updateService(localKit.deps, {
+          id: common,
+          ...actor,
+          name: 'Consulta Domiciliar',
+          priceCents: 9000,
+          fiscalServiceCode: ' 08.01 ',
+        });
+        await updateService(localKit.deps, {
+          id: fee,
+          ...actor,
+          name: 'Taxa Real',
+          priceCents: 3500,
+        });
 
-      expect(await row(fee)).toMatchObject({
-        name: 'Consulta Domiciliar',
-        name_normalized: 'consulta domiciliar',
-        price_cents: 9000,
-        fiscal_service_code: '08.01',
-        is_displacement_fee: false,
-      });
-      expect((await row(feeId)).is_displacement_fee).toBe(true);
-    });
+        const read = async (id: string) =>
+          (
+            await localKit.owner<Record<string, unknown>>('SELECT * FROM services WHERE id = $1', [
+              id,
+            ])
+          )[0]!;
+        expect(await read(common)).toMatchObject({
+          name: 'Consulta Domiciliar',
+          name_normalized: 'consulta domiciliar',
+          price_cents: 9000,
+          fiscal_service_code: '08.01',
+          is_displacement_fee: false,
+        });
+        expect(await read(fee)).toMatchObject({ price_cents: 3500, is_displacement_fee: true });
+      } finally {
+        await localKit.close();
+      }
+    }, 90_000);
 
     it('[RF-CAT-07][RN-ACE-02] mudar o preço padrão grava service.price_changed (antes/depois, só ids e centavos)', async () => {
       const id = await create({ name: 'Consulta Preço', priceCents: 8000 });

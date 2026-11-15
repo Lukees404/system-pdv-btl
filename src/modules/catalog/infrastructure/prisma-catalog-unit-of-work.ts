@@ -3,6 +3,7 @@ import { PrismaAuditLog, type AuditLog } from '@/modules/audit';
 import type { CatalogUnitOfWork, CatalogUnitOfWorkContext } from '../application/ports';
 import { PrismaCategoryRepository } from './prisma-category-repository';
 import { PrismaProductRepository } from './prisma-product-repository';
+import { PrismaServiceRepository } from './prisma-service-repository';
 
 export type PrismaCatalogUnitOfWorkOptions = {
   /** Troca a gravação de auditoria (só para testes de atomicidade). */
@@ -21,6 +22,7 @@ export class PrismaCatalogUnitOfWork implements CatalogUnitOfWork {
       work({
         categories: new PrismaCategoryRepository(tx),
         products: new PrismaProductRepository(tx),
+        services: new PrismaServiceRepository(tx),
         audit: (this.options.createAudit ?? ((client) => new PrismaAuditLog(client)))(tx),
       }),
     );
