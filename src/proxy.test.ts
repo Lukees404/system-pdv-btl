@@ -39,6 +39,33 @@ describe('proxy (checagem otimista)', () => {
     expect(response.headers.get('x-middleware-next')).toBe('1');
   });
 
+  it('[RNF-SEG-01] toda resposta (passa, redireciona, 401) leva a CSP e os cabeçalhos fixos', () => {
+    const responses = [
+      proxy(request('/conta', 'pdv_session=x')),
+      proxy(request('/conta')),
+      proxy(request('/api/vendas')),
+    ];
+
+    for (const response of responses) {
+      expect(response.headers.get('content-security-policy')).toContain("default-src 'self'");
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    }
+  });
+
+  it('[RNF-SEG-01] o nonce muda a cada requisição e é repassado à renderização', () => {
+    const first = proxy(request('/conta', 'pdv_session=x'));
+    const second = proxy(request('/conta', 'pdv_session=x'));
+    const nonceOf = (response: Response) =>
+      /'nonce-([^']+)'/.exec(response.headers.get('content-security-policy') ?? '')?.[1];
+
+    expect(nonceOf(first)).toBeTruthy();
+    expect(nonceOf(first)).not.toBe(nonceOf(second));
+    expect(first.headers.get('x-middleware-request-x-nonce')).toBe(nonceOf(first));
+    expect(first.headers.get('x-middleware-request-content-security-policy')).toBe(
+      first.headers.get('content-security-policy'),
+    );
+  });
+
   it('[RF-AUT-01] /login com sessão leva ao início; sem sessão abre normalmente', () => {
     const withSession = proxy(request('/login', 'pdv_session=x'));
     const without = proxy(request('/login'));
