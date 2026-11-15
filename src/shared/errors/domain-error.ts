@@ -16,6 +16,7 @@ export const ERROR_CODES = [
   'EMAIL_TAKEN',
   'INVALID_CREDENTIALS',
   'ACCOUNT_LOCKED',
+  'UNAUTHENTICATED',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

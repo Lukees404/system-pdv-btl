@@ -8,23 +8,41 @@ import {
 
 type UserDb = Pick<PrismaClient, 'user' | '$executeRaw'>;
 
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  role: string;
+  active: boolean;
+  failedAttempts: number;
+  lockedUntil: Date | null;
+};
+
+function toRecord(row: UserRow | null): UserRecord | null {
+  return row
+    ? {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        passwordHash: row.passwordHash,
+        role: row.role,
+        active: row.active,
+        failedAttempts: row.failedAttempts,
+        lockedUntil: row.lockedUntil,
+      }
+    : null;
+}
+
 export class PrismaUserRepository implements UserRepository {
   constructor(private readonly db: UserDb) {}
 
   async findByEmail(email: string): Promise<UserRecord | null> {
-    const row = await this.db.user.findUnique({ where: { email } });
-    return row
-      ? {
-          id: row.id,
-          name: row.name,
-          email: row.email,
-          passwordHash: row.passwordHash,
-          role: row.role,
-          active: row.active,
-          failedAttempts: row.failedAttempts,
-          lockedUntil: row.lockedUntil,
-        }
-      : null;
+    return toRecord(await this.db.user.findUnique({ where: { email } }));
+  }
+
+  async findById(id: string): Promise<UserRecord | null> {
+    return toRecord(await this.db.user.findUnique({ where: { id } }));
   }
 
   async registerFailure(userId: string, now: Date): Promise<number> {

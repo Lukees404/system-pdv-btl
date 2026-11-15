@@ -45,7 +45,11 @@ describe('verifySession e logout (banco real)', () => {
     const result = await verifySession(sessionDeps(), token);
 
     expect(result.ok).toBe(true);
-    expect(result.ok && result.value).toMatchObject({ userId, name: 'Maria da Sessão', role: 'OWNER' });
+    expect(result.ok && result.value).toMatchObject({
+      userId,
+      name: 'Maria da Sessão',
+      role: 'OWNER',
+    });
   });
 
   it('[RN-ACE-04] token desconhecido, vazio ou adulterado → UNAUTHENTICATED', async () => {

@@ -29,6 +29,7 @@ export class DuplicateEmailError extends Error {
 
 export interface UserRepository {
   findByEmail(email: string): Promise<UserRecord | null>;
+  findById(id: string): Promise<UserRecord | null>;
   /** Cria um `OWNER` ativo. Lança `DuplicateEmailError` se o e-mail já existir. */
   create(user: NewUser): Promise<void>;
   /**
@@ -50,8 +51,13 @@ export type NewSession = {
   expiresAt: Date;
 };
 
+export type SessionRecord = { id: string; userId: string; expiresAt: Date };
+
 export interface SessionRepository {
   create(session: NewSession): Promise<void>;
+  findByTokenHash(tokenHash: string): Promise<SessionRecord | null>;
+  /** Apaga a sessão com esse hash; repetir não dá erro (idempotente). */
+  deleteByTokenHash(tokenHash: string): Promise<void>;
 }
 
 /** Repositórios e auditoria ligados à MESMA transação do banco. */

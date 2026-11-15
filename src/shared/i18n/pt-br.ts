@@ -18,6 +18,7 @@ export const errorMessages: Record<ErrorCode, string> = {
   // Mesmo texto para credencial errada e conta bloqueada: não revela se o e-mail existe.
   INVALID_CREDENTIALS:
     'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
+  UNAUTHENTICATED: 'Você precisa entrar para continuar.',
   ACCOUNT_LOCKED:
     'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
 };
