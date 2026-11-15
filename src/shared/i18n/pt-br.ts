@@ -27,6 +27,14 @@ export const errorMessages: Record<ErrorCode, string> = {
   INVALID_BARCODE: 'O código de barras não pode ter espaços e deve ter até 64 caracteres.',
   INVALID_FISCAL_FIELD:
     'Confira os campos fiscais: NCM com 8 dígitos, CEST com 7, CFOP com 4, CSOSN com 3, origem de 0 a 8 e unidade com 2 letras.',
+  NOT_FOUND: 'Registro não encontrado.',
+  CATEGORY_NAME_TAKEN: 'Já existe uma categoria com este nome.',
+  CATEGORY_NOT_EMPTY: 'Não é possível excluir uma categoria que tem produtos.',
+  CATEGORY_NOT_FOUND: 'A categoria escolhida não existe.',
+  PRODUCT_NAME_TAKEN: 'Já existe um produto ativo com este nome.',
+  BARCODE_TAKEN: 'Já existe um produto com este código de barras.',
+  SERVICE_NAME_TAKEN: 'Já existe um serviço ativo com este nome.',
+  DISPLACEMENT_FEE_EXISTS: 'Já existe uma taxa de deslocamento cadastrada.',
   ACCOUNT_LOCKED:
     'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
 };
