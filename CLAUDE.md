@@ -4,7 +4,7 @@ Sistema de PDV web (PWA) para um pet shop familiar que também faz atendimentos 
 
 ## Fonte da verdade
 
-A documentação em `docs/` manda. **Comece por `docs/README.md`.** Se código e documentação divergem, pare e pergunte; mudanças de comportamento começam pelo documento. `estudos/` são notas de aprendizado do desenvolvedor: **não são fonte de regras** e não devem guiar a implementação.
+A documentação em `docs/` manda. **Comece por `docs/README.md`.** Se código e documentação divergem, pare e pergunte; mudanças de comportamento começam pelo documento. `estudos/` são notas de aprendizado do desenvolvedor, uma por etapa em `estudos/M?/M?-etapa-NN-tema.md` (com a linha correspondente no `estudos/README.md`): **não são fonte de regras** e não devem guiar a implementação.
 
 | Preciso de... | Leia |
 |---|---|

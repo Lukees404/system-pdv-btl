@@ -70,11 +70,15 @@ Formato: **Status · Contexto · Decisão · Consequências · Alternativas desc
 ```
 .
 ├─ CLAUDE.md
-├─ docs/
+├─ README.md
+├─ docs/                   esta documentação; runbooks/ com os procedimentos operacionais
+├─ estudos/                notas de aprendizado por marco (M0/, M1/, ...); não são fonte de regras
+├─ .claude/agents/         subagentes do projeto (ex.: rule-auditor)
 ├─ prisma/                 schema.prisma, migrations/ (SQL manual p/ CHECK, índices parciais), seed.ts
 ├─ prisma.config.ts        URL das migrações (DIRECT_URL), caminho do seed
 ├─ docker-compose.yml      Postgres local; docker/initdb/ cria os papéis e bancos
 ├─ .github/                workflows/ci.yml e actions/setup
+├─ .gitleaks.toml          exceção estreita da varredura de segredos (senhas fictícias de teste)
 ├─ scripts/                create-user.ts, db-backup.ts, check-stock-consistency.ts, check-traceability.ts
 ├─ src/
 │  ├─ app/                 rotas, layouts, Server Actions finas
@@ -85,9 +89,10 @@ Formato: **Status · Contexto · Decisão · Consequências · Alternativas desc
 │  │  │    ├─ infrastructure/  repositórios Prisma/SQL e adaptadores
 │  │  │    ├─ ui/              componentes e formulários do módulo
 │  │  │    └─ index.ts         API pública do módulo (único ponto de entrada)
-│  ├─ shared/              money, clock, ids, result, errors, validation, i18n
+│  ├─ proxy.ts             checagem otimista de sessão, CSP com nonce e cabeçalhos fixos (RNF-SEG-01/04)
+│  ├─ shared/              money, clock, ids, result, errors, i18n, pii, text (normalização)
 │  ├─ config/business.ts   especificidades do negócio (ADR-017)
-│  └─ lib/                 cliente de banco, env validado, logger
+│  └─ lib/                 cliente de banco, env validado, logger, cabeçalhos de segurança, cola do Next com o auth
 └─ tests/                  e2e/, integration/, boundaries/, fixtures/ (planilhas e fixtures de fronteiras), helpers/ (factories, db de teste)
 ```
 

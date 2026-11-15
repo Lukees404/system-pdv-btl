@@ -33,4 +33,4 @@
 
 ## Status do conjunto
 
-Versão `0.1` — rascunho para validação. Pendências de validação: regras de negócio com os clientes (`OQ` marcadas *Primos*) e pontos fiscais com o contador (`OQ` marcadas *Contador*).
+Versão `0.2` — M0 e M1 concluídos e em produção; M2 (catálogo) em andamento (ver `08`). Pendências de validação: regras de negócio com os clientes (`OQ` marcadas *Primos*) e pontos fiscais com o contador (`OQ` marcadas *Contador*).
