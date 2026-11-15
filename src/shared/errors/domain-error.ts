@@ -17,6 +17,7 @@ export const ERROR_CODES = [
   'INVALID_CREDENTIALS',
   'ACCOUNT_LOCKED',
   'UNAUTHENTICATED',
+  'CURRENT_PASSWORD_INCORRECT',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

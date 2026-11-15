@@ -41,6 +41,7 @@ export interface UserRepository {
   lockUntil(userId: string, until: Date, now: Date): Promise<void>;
   /** Zera as falhas e o bloqueio (login correto). */
   resetFailures(userId: string, now: Date): Promise<void>;
+  updatePasswordHash(userId: string, passwordHash: string, now: Date): Promise<void>;
 }
 
 export type NewSession = {
@@ -58,6 +59,8 @@ export interface SessionRepository {
   findByTokenHash(tokenHash: string): Promise<SessionRecord | null>;
   /** Apaga a sessão com esse hash; repetir não dá erro (idempotente). */
   deleteByTokenHash(tokenHash: string): Promise<void>;
+  /** Apaga TODAS as sessões do usuário, menos a que tem `keepTokenHash` (RF-AUT-03). */
+  deleteOthers(userId: string, keepTokenHash: string): Promise<void>;
 }
 
 /** Repositórios e auditoria ligados à MESMA transação do banco. */

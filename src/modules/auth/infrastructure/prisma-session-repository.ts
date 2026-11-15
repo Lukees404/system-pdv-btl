@@ -16,6 +16,10 @@ export class PrismaSessionRepository implements SessionRepository {
     await this.db.session.deleteMany({ where: { tokenHash } });
   }
 
+  async deleteOthers(userId: string, keepTokenHash: string): Promise<void> {
+    await this.db.session.deleteMany({ where: { userId, tokenHash: { not: keepTokenHash } } });
+  }
+
   async create(session: NewSession): Promise<void> {
     await this.db.session.create({
       data: {

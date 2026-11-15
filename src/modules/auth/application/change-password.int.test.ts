@@ -21,7 +21,12 @@ describe('changePassword (banco real)', () => {
     clock: kit.clock,
     ids: kit.ids,
   });
-  const changeDeps = (uow = kit.uow) => ({ uow, hasher: kit.hasher, tokens: kit.tokens, clock: kit.clock });
+  const changeDeps = (uow = kit.uow) => ({
+    uow,
+    hasher: kit.hasher,
+    tokens: kit.tokens,
+    clock: kit.clock,
+  });
 
   /** Cria um usuário e abre `sessions` sessões (uma por login). */
   const seed = async (sessions = 2) => {
@@ -41,11 +46,15 @@ describe('changePassword (banco real)', () => {
   };
 
   const hashOf = async (userId: string) =>
-    (await kit.owner<{ password_hash: string }>('SELECT password_hash FROM users WHERE id = $1', [userId]))[0]
-      ?.password_hash;
+    (
+      await kit.owner<{ password_hash: string }>('SELECT password_hash FROM users WHERE id = $1', [
+        userId,
+      ])
+    )[0]?.password_hash;
   const sessionCount = async (userId: string) =>
     (await kit.owner('SELECT 1 FROM sessions WHERE user_id = $1', [userId])).length;
-  const codeOf = (result: Awaited<ReturnType<typeof changePassword>>) => (result.ok ? null : result.error.code);
+  const codeOf = (result: Awaited<ReturnType<typeof changePassword>>) =>
+    result.ok ? null : result.error.code;
 
   beforeAll(async () => {
     kit = await createAuthTestKit();
@@ -76,7 +85,12 @@ describe('changePassword (banco real)', () => {
 
   it('[RF-AUT-03] depois da troca a senha nova entra e a antiga não', async () => {
     const { email, userId, tokens } = await seed(1);
-    await changePassword(changeDeps(), { userId, sessionToken: tokens[0]!, currentPassword: OLD, newPassword: NEW });
+    await changePassword(changeDeps(), {
+      userId,
+      sessionToken: tokens[0]!,
+      currentPassword: OLD,
+      newPassword: NEW,
+    });
 
     const withOld = await login(loginDeps(), { email, password: OLD });
     const withNew = await login(loginDeps(), { email, password: NEW });
@@ -88,13 +102,29 @@ describe('changePassword (banco real)', () => {
   it('[RN-ACE-02][RN-ACE-03] audita user.password_changed só com IDs, na mesma transação', async () => {
     const { userId, tokens } = await seed(1);
 
-    await changePassword(changeDeps(), { userId, sessionToken: tokens[0]!, currentPassword: OLD, newPassword: NEW });
+    await changePassword(changeDeps(), {
+      userId,
+      sessionToken: tokens[0]!,
+      currentPassword: OLD,
+      newPassword: NEW,
+    });
 
-    const [audit] = await kit.owner<{ action: string; entity_type: string; entity_id: string; user_id: string; data: unknown }>(
+    const [audit] = await kit.owner<{
+      action: string;
+      entity_type: string;
+      entity_id: string;
+      user_id: string;
+      data: unknown;
+    }>(
       "SELECT action, entity_type, entity_id, user_id, data FROM audit_log WHERE action = 'user.password_changed' AND entity_id = $1",
       [userId],
     );
-    expect(audit).toMatchObject({ entity_type: 'user', entity_id: userId, user_id: userId, data: {} });
+    expect(audit).toMatchObject({
+      entity_type: 'user',
+      entity_id: userId,
+      user_id: userId,
+      data: {},
+    });
     expect(JSON.stringify(audit)).not.toContain(NEW);
     expect(JSON.stringify(audit)).not.toContain(OLD);
   });
@@ -113,9 +143,15 @@ describe('changePassword (banco real)', () => {
     expect(codeOf(result)).toBe('CURRENT_PASSWORD_INCORRECT');
     expect(await hashOf(userId)).toBe(before);
     expect(await sessionCount(userId)).toBe(2);
-    const audits = await kit.owner("SELECT 1 FROM audit_log WHERE action = 'user.password_changed' AND entity_id = $1", [userId]);
+    const audits = await kit.owner(
+      "SELECT 1 FROM audit_log WHERE action = 'user.password_changed' AND entity_id = $1",
+      [userId],
+    );
     expect(audits).toHaveLength(0);
-    const [user] = await kit.owner<{ failed_attempts: number }>('SELECT failed_attempts FROM users WHERE id = $1', [userId]);
+    const [user] = await kit.owner<{ failed_attempts: number }>(
+      'SELECT failed_attempts FROM users WHERE id = $1',
+      [userId],
+    );
     expect(user?.failed_attempts).toBe(1);
   });
 
@@ -186,9 +222,17 @@ describe('changePassword (banco real)', () => {
     await login(loginDeps(), { email, password: 'errada-1234567' });
     await login(loginDeps(), { email, password: 'errada-1234567' });
 
-    await changePassword(changeDeps(), { userId, sessionToken: tokens[0]!, currentPassword: OLD, newPassword: NEW });
+    await changePassword(changeDeps(), {
+      userId,
+      sessionToken: tokens[0]!,
+      currentPassword: OLD,
+      newPassword: NEW,
+    });
 
-    const [user] = await kit.owner<{ failed_attempts: number }>('SELECT failed_attempts FROM users WHERE id = $1', [userId]);
+    const [user] = await kit.owner<{ failed_attempts: number }>(
+      'SELECT failed_attempts FROM users WHERE id = $1',
+      [userId],
+    );
     expect(user?.failed_attempts).toBe(0);
   });
 

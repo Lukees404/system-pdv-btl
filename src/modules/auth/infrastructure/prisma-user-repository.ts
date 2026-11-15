@@ -65,6 +65,10 @@ export class PrismaUserRepository implements UserRepository {
        WHERE id = ${userId}::uuid`;
   }
 
+  async updatePasswordHash(userId: string, passwordHash: string, now: Date): Promise<void> {
+    await this.db.user.update({ where: { id: userId }, data: { passwordHash, updatedAt: now } });
+  }
+
   async resetFailures(userId: string, now: Date): Promise<void> {
     await this.db.user.update({
       where: { id: userId },
