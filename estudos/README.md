@@ -34,3 +34,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | M1·11 | Script create-user e fechamento | [M1-etapa-11-create-user-e-fechamento.md](M1-etapa-11-create-user-e-fechamento.md) |
 | M2·0 | Documentos primeiro (ADR-020 revisada) | [M2-etapa-00-documentos-primeiro.md](M2-etapa-00-documentos-primeiro.md) |
 | M2·1 | normalizeText e parseMoneyInput | [M2-etapa-01-normalize-e-parse-de-preco.md](M2-etapa-01-normalize-e-parse-de-preco.md) |
+| M2·2 | Modelo de dados e migração do catálogo | [M2-etapa-02-modelo-de-dados-do-catalogo.md](M2-etapa-02-modelo-de-dados-do-catalogo.md) |
