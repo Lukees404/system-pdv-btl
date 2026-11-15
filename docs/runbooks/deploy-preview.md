@@ -95,6 +95,8 @@ A migração é um passo **manual e controlado** (RNF-OPS-02), nunca automático
 
 O Supabase expõe, por padrão, uma API REST sobre o schema `public` e concede privilégios aos papéis `anon` e `authenticated` em tabelas novas. O PDV guarda dados pessoais de tutores e **não usa** essa API (ADR-005). Antes de criar tabelas: desligar a _Data API_ do projeto (ou revogar os privilégios padrão desses papéis) e rodar os _advisors_ de segurança. Registrar o resultado aqui.
 
+**Resultado (15/11/2026):** Data API desligada; _advisors_ de segurança só com o aviso `extension_in_public` (`unaccent`, `pg_trgm`), tratado no M2. Os privilégios padrão do `pdv_owner` concedem apenas ao `pdv_app`; `anon` e `authenticated` não recebem nada nas tabelas novas.
+
 ## 7. Implantar o M1 (autenticação) em produção
 
 Ordem obrigatória; cada passo é seu, no terminal ou no painel (**senhas nunca no chat**):

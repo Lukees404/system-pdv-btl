@@ -39,11 +39,17 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 - **Desvios do escopo original:** as extensões `unaccent`/`pg_trgm` foram criadas já na migração-base do M0 (o M2 apenas as usa); `RN-DIN-04` (total > 0) não tem teste no M0, porque é regra da venda e entra no M7; Prisma fixado em 7.10.1 (a tag `latest` do CLI aponta para um RC); `DIRECT_URL` é opcional no servidor.
 - **Cobertura de regras no fim do M0:** `check:traceability` mostra 4 de 154 (`RN-DIN-01`, `02`, `03`, `05`).
 
-## M1 — Autenticação e auditoria · ◐ código pronto, falta a implantação em produção
+## M1 — Autenticação e auditoria · ☑ concluído em 15/11/2026
 **Escopo:** RF-AUT-01…04; módulo `audit`; tabela `users`; sessões; limitação de tentativas; script `create-user`; casca da aplicação (layout, navegação mobile/desktop); ADR-011 decidido: implementação própria (ver `04`); parâmetros de segurança em `OQ-28`. **Antes de migrar a produção:** desligar a Data API do Supabase (`docs/runbooks/deploy-preview.md` §6).
 **Regras:** RN-ACE-01…06, RNF-SEG-01…05/07.
 **Testes primeiro:** login válido/inválido, bloqueio após 5 falhas, troca de senha invalida sessões, rotas protegidas retornam 401/403, `audit_log` sem `UPDATE/DELETE`, nenhum dado pessoal em auditoria.
 **Saída:** é possível entrar, sair e trocar a senha; ações auditadas.
+**Resultado (15/11/2026):**
+- **Produção:** Data API do Supabase desligada e _advisors_ sem alerta novo; migração aplicada com `pdv_owner` (`audit_log` só com `INSERT`/`SELECT` para `pdv_app`); deploy da `main` no ar com `/api/health` 200; primeiro usuário `OWNER` criado por `pnpm create-user`; login, troca de senha e saída conferidos pelo dono, com `user.created` e `user.password_changed` auditados sem dado pessoal.
+- **Testes no fim do M1:** 339 unitários, 88 de integração e 28 E2E (celular 360 px e desktop, axe, CSP; também rodados sobre o build de produção). `check:traceability`: `RN-ACE` 6/6 e `RF-AUT` 4/4.
+- **Defeitos reais achados pelos testes e corrigidos:** laço de redirecionamento com cookie de sessão inválido; `login` segurando transação durante o hash; cookie `__Host-` não apagado ao sair (precisa de `Secure` e `Path=/`).
+- **Desvios do escopo original:** CSP com nonce entrou no M1 (decisão do dono do projeto); o gitleaks ganhou uma exceção estreita (`.gitleaks.toml`) para senhas fictícias de teste; sem fluxo de "esqueci a senha" (OQ-29).
+- **Pendências:** `changePassword` ainda faz o hash dentro da transação; região das funções da Vercel (`gru1`); extensões no schema `public` (M2).
 
 ## M2 — Catálogo
 **Escopo:** RF-CAT-01…04, 06, 07 (foto = `S`, pode ir ao M10); extensões `unaccent`/`pg_trgm` (já criadas na migração-base do M0; aqui entram os índices e a busca); busca rápida; campos fiscais opcionais com validação; arquivar/reativar; auditoria de alteração de preço/custo; seed de serviços e taxa de deslocamento.
