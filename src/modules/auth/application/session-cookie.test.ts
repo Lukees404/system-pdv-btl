@@ -23,7 +23,12 @@ describe('sessionCookie', () => {
     const cookie = sessionCookie({ isProduction: false, token: 'abc', expiresAt });
 
     expect(cookie.name).toBe('pdv_session');
-    expect(cookie.options).toMatchObject({ httpOnly: true, secure: false, sameSite: 'lax', path: '/' });
+    expect(cookie.options).toMatchObject({
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+    });
   });
 
   it('[RNF-SEG-02] o prefixo __Host- proíbe o atributo Domain: o cookie não pode ter domain', () => {
@@ -45,7 +50,13 @@ describe('expiredSessionCookie', () => {
 
     expect(cookie.name).toBe('__Host-pdv_session');
     expect(cookie.value).toBe('');
-    expect(cookie.options).toMatchObject({ httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: 0 });
+    expect(cookie.options).toMatchObject({
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 0,
+    });
     expect(cookie.options.expires?.getTime()).toBe(0);
   });
 });

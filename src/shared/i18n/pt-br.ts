@@ -20,6 +20,8 @@ export const errorMessages: Record<ErrorCode, string> = {
     'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
   UNAUTHENTICATED: 'Você precisa entrar para continuar.',
   CURRENT_PASSWORD_INCORRECT: 'A senha atual está incorreta.',
+  INVALID_INPUT: 'Confira os campos e tente novamente.',
+  PASSWORD_MISMATCH: 'A confirmação não confere com a nova senha.',
   ACCOUNT_LOCKED:
     'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
 };

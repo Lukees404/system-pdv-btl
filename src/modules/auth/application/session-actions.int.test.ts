@@ -13,7 +13,13 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
   let counter = 0;
 
   const context = (jar = new FakeCookieJar()) => ({
-    services: { uow: kit.uow, hasher: kit.hasher, tokens: kit.tokens, clock: kit.clock, ids: kit.ids },
+    services: {
+      uow: kit.uow,
+      hasher: kit.hasher,
+      tokens: kit.tokens,
+      clock: kit.clock,
+      ids: kit.ids,
+    },
     jar,
     isProduction: false,
   });
@@ -39,8 +45,11 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
   const sessionCount = async (userId: string) =>
     (await kit.owner('SELECT 1 FROM sessions WHERE user_id = $1', [userId])).length;
   const hashOf = async (userId: string) =>
-    (await kit.owner<{ password_hash: string }>('SELECT password_hash FROM users WHERE id = $1', [userId]))[0]
-      ?.password_hash;
+    (
+      await kit.owner<{ password_hash: string }>('SELECT password_hash FROM users WHERE id = $1', [
+        userId,
+      ])
+    )[0]?.password_hash;
 
   beforeAll(async () => {
     kit = await createAuthTestKit();
@@ -61,8 +70,15 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
       const cookie = jar.setCalls[0]!;
       expect(cookie.name).toBe(COOKIE);
       expect(cookie.value).toMatch(/^token-\d+$/);
-      expect(cookie.options).toMatchObject({ httpOnly: true, sameSite: 'lax', path: '/', secure: false });
-      expect((cookie.options.expires as Date).getTime()).toBe(kit.clock.now().getTime() + 30 * 24 * 3600 * 1000);
+      expect(cookie.options).toMatchObject({
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false,
+      });
+      expect((cookie.options.expires as Date).getTime()).toBe(
+        kit.clock.now().getTime() + 30 * 24 * 3600 * 1000,
+      );
       expect(await sessionCount(userId)).toBe(1);
     });
 
@@ -82,10 +98,14 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
 
     it('[RF-AUT-01] conta bloqueada mostra EXATAMENTE a mesma mensagem (não revela que o e-mail existe)', async () => {
       const { email } = await seedUser();
-      for (let i = 0; i < 5; i += 1) await performLogin(context(), { email, password: 'errada-1234567' });
+      for (let i = 0; i < 5; i += 1)
+        await performLogin(context(), { email, password: 'errada-1234567' });
 
       const locked = await performLogin(context(), { email, password: PASSWORD });
-      const unknown = await performLogin(context(), { email: 'ninguem@exemplo.com', password: PASSWORD });
+      const unknown = await performLogin(context(), {
+        email: 'ninguem@exemplo.com',
+        password: PASSWORD,
+      });
 
       expect(locked.ok === false && locked.message).toBe(unknown.ok === false && unknown.message);
     });
@@ -95,16 +115,19 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
       ['lista', []],
       ['sem senha', { email: 'a@b.co' }],
       ['senha que não é texto', { email: 'a@b.co', password: 123 }],
-    ])('[RNF-SEG-05] entrada inválida (%s) → INVALID_INPUT, sem tocar no banco nem no cookie', async (_l, raw) => {
-      const jar = new FakeCookieJar();
-      const hashes = kit.hasher.hashCalls + kit.hasher.verifyCalls;
+    ])(
+      '[RNF-SEG-05] entrada inválida (%s) → INVALID_INPUT, sem tocar no banco nem no cookie',
+      async (_l, raw) => {
+        const jar = new FakeCookieJar();
+        const hashes = kit.hasher.hashCalls + kit.hasher.verifyCalls;
 
-      const result = await performLogin(context(jar), raw);
+        const result = await performLogin(context(jar), raw);
 
-      expect(result.ok === false && result.code).toBe('INVALID_INPUT');
-      expect(jar.setCalls).toHaveLength(0);
-      expect(kit.hasher.hashCalls + kit.hasher.verifyCalls).toBe(hashes);
-    });
+        expect(result.ok === false && result.code).toBe('INVALID_INPUT');
+        expect(jar.setCalls).toHaveLength(0);
+        expect(kit.hasher.hashCalls + kit.hasher.verifyCalls).toBe(hashes);
+      },
+    );
   });
 
   describe('currentUser (a camada de acesso)', () => {
@@ -123,7 +146,11 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
 
       const result = await currentUser(context(jar));
 
-      expect(result.ok && result.value).toMatchObject({ userId, name: 'Usuária Ação', role: 'OWNER' });
+      expect(result.ok && result.value).toMatchObject({
+        userId,
+        name: 'Usuária Ação',
+        role: 'OWNER',
+      });
     });
   });
 
@@ -184,7 +211,10 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
       const before = await hashOf(userId);
       const hashes = kit.hasher.hashCalls;
 
-      const result = await performChangePassword(context(jar), form({ confirmPassword: 'outra-coisa-123' }));
+      const result = await performChangePassword(
+        context(jar),
+        form({ confirmPassword: 'outra-coisa-123' }),
+      );
 
       expect(result.ok === false && result.code).toBe('PASSWORD_MISMATCH');
       expect(await hashOf(userId)).toBe(before);
@@ -202,7 +232,10 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
     it('[RF-AUT-03] senha atual errada e senha nova fraca devolvem mensagens específicas em pt-BR', async () => {
       const { jar } = await loggedIn();
 
-      const wrongCurrent = await performChangePassword(context(jar), form({ currentPassword: 'nao-sou-eu-123' }));
+      const wrongCurrent = await performChangePassword(
+        context(jar),
+        form({ currentPassword: 'nao-sou-eu-123' }),
+      );
       const weakNew = await performChangePassword(
         context(jar),
         form({ newPassword: 'curta', confirmPassword: 'curta' }),
@@ -213,7 +246,11 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
         code: 'CURRENT_PASSWORD_INCORRECT',
         message: errorMessage('CURRENT_PASSWORD_INCORRECT'),
       });
-      expect(weakNew).toEqual({ ok: false, code: 'WEAK_PASSWORD', message: errorMessage('WEAK_PASSWORD') });
+      expect(weakNew).toEqual({
+        ok: false,
+        code: 'WEAK_PASSWORD',
+        message: errorMessage('WEAK_PASSWORD'),
+      });
     });
 
     it('[RNF-SEG-04] quem troca é SEMPRE o dono da sessão: um userId no formulário é ignorado (sem IDOR)', async () => {

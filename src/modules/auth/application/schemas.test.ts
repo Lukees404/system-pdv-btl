@@ -3,7 +3,11 @@ import { changePasswordSchema, loginSchema } from './schemas';
 
 describe('loginSchema', () => {
   it('[RNF-SEG-05] aceita e-mail e senha como texto e ignora campos extras (ex.: os do Next)', () => {
-    const parsed = loginSchema.safeParse({ email: 'a@b.co', password: 'x', $ACTION_ID_1: 'ignorado' });
+    const parsed = loginSchema.safeParse({
+      email: 'a@b.co',
+      password: 'x',
+      $ACTION_ID_1: 'ignorado',
+    });
 
     expect(parsed.success).toBe(true);
     expect(parsed.success && parsed.data).toEqual({ email: 'a@b.co', password: 'x' });
@@ -37,6 +41,8 @@ describe('changePasswordSchema', () => {
   );
 
   it('[RNF-SEG-05] limita o tamanho dos três campos', () => {
-    expect(changePasswordSchema.safeParse({ ...valid, newPassword: 'x'.repeat(1025) }).success).toBe(false);
+    expect(
+      changePasswordSchema.safeParse({ ...valid, newPassword: 'x'.repeat(1025) }).success,
+    ).toBe(false);
   });
 });

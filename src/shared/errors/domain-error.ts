@@ -18,6 +18,8 @@ export const ERROR_CODES = [
   'ACCOUNT_LOCKED',
   'UNAUTHENTICATED',
   'CURRENT_PASSWORD_INCORRECT',
+  'INVALID_INPUT',
+  'PASSWORD_MISMATCH',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

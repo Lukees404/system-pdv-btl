@@ -12,6 +12,24 @@ export type { LogoutDeps } from './application/logout';
 export { verifySession } from './application/verify-session';
 export type { SessionUser, VerifySessionDeps } from './application/verify-session';
 
+// Camada web (sem depender do Next): ações finas, cookie e política de acesso
+export { decideAccess } from './application/access-policy';
+export type { AccessDecision } from './application/access-policy';
+export { SESSION_COOKIE_NAMES, sessionCookieName } from './application/session-cookie';
+export type { SessionCookieOptions } from './application/session-cookie';
+export {
+  currentUser,
+  performChangePassword,
+  performLogin,
+  performLogout,
+} from './application/session-actions';
+export type {
+  ActionResult,
+  AuthContext,
+  AuthServices,
+  CookieJar,
+} from './application/session-actions';
+
 // Portas
 export type { PasswordHasher, SessionTokens, UnitOfWork } from './application/ports';
 
