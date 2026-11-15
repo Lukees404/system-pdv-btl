@@ -14,10 +14,10 @@ Formato: **Status · Contexto · Decisão · Consequências · Alternativas desc
 **Contexto:** 4 aparelhos vendendo ao mesmo tempo exigem transações e concorrência reais. **Decisão:** PostgreSQL. **Descartadas:** SQLite (concorrência de escrita e acesso remoto limitados para este uso).
 
 ### ADR-004 — Prisma como ORM e gerenciador de migrações
-**Decisão:** Prisma para modelo, migrações e consultas comuns; **SQL bruto parametrizado** onde necessário (UPDATE condicional de estoque, busca com `pg_trgm`, relatórios). **Consequências:** `CHECK`, índices parciais e extensões entram em migrações SQL escritas à mão. **Alternativas:** Drizzle (válida; sem ganho decisivo aqui).
+**Decisão:** Prisma para modelo, migrações e consultas comuns; **SQL bruto parametrizado** onde necessário (UPDATE condicional de estoque, busca com `pg_trgm`, relatórios). **Consequências:** `CHECK`, índices parciais e extensões entram em migrações SQL escritas à mão. **Alternativas:** Drizzle (válida; sem ganho decisivo aqui). **Implementação (M0):** Prisma 7.10.1 fixo; a URL das migrações fica em `prisma.config.ts` (`DIRECT_URL`) e a aplicação usa `DATABASE_URL` pelo adapter `pg` (`src/lib/db.ts`); o client gerado fica em `src/generated/` (fora do Git).
 
 ### ADR-005 — Supabase só como Postgres + armazenamento via porta; Vercel na hospedagem
-**Decisão:** usar Supabase como **Postgres gerenciado** (conexão via *pooler* em ambiente serverless) e como armazenamento S3-compatível **atrás da porta `FileStorage`**. Nada de recursos exclusivos (Auth, RLS, Realtime, Edge Functions) no domínio. Aplicação na Vercel. **Consequências:** trocar de provedor de banco/arquivos é uma mudança de adaptador (RNF-POR-01/03). **Atenção:** conexões em serverless → usar o pooler e limitar o pool.
+**Decisão:** usar Supabase como **Postgres gerenciado** (conexão via *pooler* em ambiente serverless) e como armazenamento S3-compatível **atrás da porta `FileStorage`**. Nada de recursos exclusivos (Auth, RLS, Realtime, Edge Functions) no domínio. Aplicação na Vercel. **Consequências:** trocar de provedor de banco/arquivos é uma mudança de adaptador (RNF-POR-01/03). **Atenção:** conexões em serverless → usar o pooler e limitar o pool. **Implementação (M0):** dois papéis de banco, `pdv_owner` (dono do schema, roda migrações) e `pdv_app` (aplicação, só DML, RNF-SEG-07); a credencial do dono nunca entra no ambiente do servidor. Migrações pelo Supavisor em modo *session* e a aplicação em modo *transaction* (a conexão direta do Supabase é só IPv6); detalhes em `docs/runbooks/deploy-preview.md`.
 
 ### ADR-006 — Dinheiro em centavos (inteiro)
 **Decisão:** `number` inteiro seguro (`Number.isSafeInteger`) em centavos, encapsulado em utilitário `Money` em `shared/` (soma, subtração, `percentOf` com half-up, rateio por maior resto, formatação `R$`). `CHECK` no banco. **Descartadas:** `float` (erro de arredondamento), `Decimal` (desnecessário para BRL).
@@ -71,7 +71,10 @@ Formato: **Status · Contexto · Decisão · Consequências · Alternativas desc
 ├─ CLAUDE.md
 ├─ docs/
 ├─ prisma/                 schema.prisma, migrations/ (SQL manual p/ CHECK, índices parciais), seed.ts
-├─ scripts/                create-user.ts, db-backup.ts, check-stock-consistency.ts
+├─ prisma.config.ts        URL das migrações (DIRECT_URL), caminho do seed
+├─ docker-compose.yml      Postgres local; docker/initdb/ cria os papéis e bancos
+├─ .github/                workflows/ci.yml e actions/setup
+├─ scripts/                create-user.ts, db-backup.ts, check-stock-consistency.ts, check-traceability.ts
 ├─ src/
 │  ├─ app/                 rotas, layouts, Server Actions finas
 │  ├─ modules/
@@ -84,7 +87,7 @@ Formato: **Status · Contexto · Decisão · Consequências · Alternativas desc
 │  ├─ shared/              money, clock, ids, result, errors, validation, i18n
 │  ├─ config/business.ts   especificidades do negócio (ADR-017)
 │  └─ lib/                 cliente de banco, env validado, logger
-└─ tests/                  e2e/, fixtures/ (planilhas de exemplo), helpers/ (factories, db de teste)
+└─ tests/                  e2e/, integration/, boundaries/, fixtures/ (planilhas e fixtures de fronteiras), helpers/ (factories, db de teste)
 ```
 
 ## Fronteiras de módulos

@@ -6,7 +6,7 @@ Marcos pequenos, cada um **testável e utilizável**. Tamanho: `S` pequeno, `M` 
 
 | Marco | Nome | Tam. | Status |
 |---|---|---|---|
-| M0 | Fundação | M | ☐ |
+| M0 | Fundação | M | ◐ código concluído; pendentes: CI no GitHub e deploy de preview (ver "Execução do M0") |
 | M1 | Autenticação e auditoria | M | ☐ |
 | M2 | Catálogo (categorias, produtos, serviços) | M | ☐ |
 | M3 | Estoque (livro de movimentos) | M | ☐ |
@@ -31,6 +31,12 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 **Testes primeiro:** `Money` completo (soma, half-up, rateio por maior resto, formatação, propriedades com `fast-check`); `Clock`/`Result`; teste de integração "migrações aplicam do zero"; teste que **falha** quando uma fronteira de módulo é violada.
 **Saída:** CI verde; deploy de preview respondendo `/api/health` com banco.
 
+**Execução do M0 (14/11/2026):**
+- **Feito e verificado:** tudo do escopo, exceto o que está em "Pendentes". Em clone limpo com Postgres novo, a sequência do CI passa (unitários, integração, build, E2E, auditoria).
+- **Pendentes (dependem de contas externas):** (1) repositório no GitHub, para o CI rodar de verdade (`.github/workflows/ci.yml` está pronto, mas nunca executou no GitHub); (2) deploy de preview em Vercel + Supabase, conforme `docs/runbooks/deploy-preview.md`. O M0 só vira ☑ com o CI verde e o preview respondendo `/api/health` com banco.
+- **Desvios do escopo original:** as extensões `unaccent`/`pg_trgm` foram criadas já na migração-base do M0 (o M2 apenas as usa); `RN-DIN-04` (total > 0) não tem teste no M0, porque é regra da venda e entra no M7; Prisma fixado em 7.10.1 (a tag `latest` do CLI aponta para um RC); `DIRECT_URL` é opcional no servidor.
+- **Cobertura de regras no fim do M0:** `check:traceability` mostra 4 de 154 (`RN-DIN-01`, `02`, `03`, `05`).
+
 ## M1 — Autenticação e auditoria
 **Escopo:** RF-AUT-01…04; módulo `audit`; tabela `users`; sessões; limitação de tentativas; script `create-user`; casca da aplicação (layout, navegação mobile/desktop); escolha da biblioteca de auth (ADR-011).
 **Regras:** RN-ACE-01…06, RNF-SEG-01…05/07.
@@ -38,7 +44,7 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 **Saída:** é possível entrar, sair e trocar a senha; ações auditadas.
 
 ## M2 — Catálogo
-**Escopo:** RF-CAT-01…04, 06, 07 (foto = `S`, pode ir ao M10); extensões `unaccent`/`pg_trgm`; busca rápida; campos fiscais opcionais com validação; arquivar/reativar; auditoria de alteração de preço/custo; seed de serviços e taxa de deslocamento.
+**Escopo:** RF-CAT-01…04, 06, 07 (foto = `S`, pode ir ao M10); extensões `unaccent`/`pg_trgm` (já criadas na migração-base do M0; aqui entram os índices e a busca); busca rápida; campos fiscais opcionais com validação; arquivar/reativar; auditoria de alteração de preço/custo; seed de serviços e taxa de deslocamento.
 **Regras:** RN-CAT-01…07, RN-SER-01…03/05/07, RN-FIS-02.
 **Testes primeiro:** unicidade (nome, código de barras, taxa única), busca sem acento/parcial com 5.000 produtos (limiar RNF-DES-01), arquivados fora da busca de venda, validação de NCM/CFOP/CSOSN.
 **Saída:** catálogo completo e utilizável.

@@ -30,7 +30,27 @@ A documentação em `docs/` manda. **Comece por `docs/README.md`.** Se código e
 
 ## Comandos
 
-Definidos no M0 (atualize esta seção quando existirem). Esperado: `pnpm dev`, `pnpm test` (unitário), `pnpm test:int` (integração, Postgres de teste), `pnpm test:e2e`, `pnpm lint`, `pnpm typecheck`, `pnpm check:boundaries`, `pnpm check:traceability`, `pnpm db:migrate`, `pnpm db:seed`.
+Todos funcionam em PowerShell e Linux (scripts em Node/TS, sem shell exclusivo de Linux). Docker Desktop precisa estar aberto para `db:*`, `test:int` e `test:e2e`; copie `.env.example` para `.env` na primeira vez.
+
+```text
+pnpm dev                    # servidor de desenvolvimento
+pnpm build / start          # prisma generate + next build / servidor de produção
+pnpm check                  # lint + format:check + typecheck + check:boundaries + test (rápido, sem banco)
+pnpm test                   # unitários (Vitest, projeto "unit")
+pnpm test:watch             # unitários em modo observação
+pnpm test:int               # integração com Postgres real (exige pnpm db:up; um banco isolado por arquivo)
+pnpm test:e2e               # Playwright, celular 360 px e desktop (exige db:up; sobe o pnpm dev sozinho)
+pnpm lint / format          # ESLint / Prettier (format:check só confere)
+pnpm typecheck              # tsc --noEmit
+pnpm check:boundaries       # dependency-cruiser: fronteiras de módulos (docs/04)
+pnpm check:traceability     # RN/RF sem teste (informativo até o M7)
+pnpm db:up / db:down        # docker compose up -d --wait / down (Postgres 17 em 127.0.0.1:54329)
+pnpm db:migrate             # prisma migrate deploy (usa DIRECT_URL, dono do schema)
+pnpm db:migrate:dev         # prisma migrate dev (cria migração nova)
+pnpm db:generate / db:seed  # prisma generate / seed idempotente
+```
+
+Banco: `pdv_owner` migra (`DIRECT_URL`); a aplicação usa `pdv_app`, só DML (`DATABASE_URL`). `DIRECT_URL` é opcional no servidor. Deploy de preview: `docs/runbooks/deploy-preview.md`.
 
 ## Stack
 

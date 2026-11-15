@@ -143,4 +143,4 @@ Constraint: `HOME_VISIT` exige `customer_id` e `service_address`; `COMPLETED` ex
 
 ## Migrações
 
-Versionadas e revisadas; `CHECK`, índices parciais, extensões e `GRANT/REVOKE` em arquivos SQL manuais dentro das migrações; estratégia **expandir → migrar → contrair** (RNF-INT-05); nunca editar migração já aplicada em produção.
+Versionadas e revisadas; `CHECK`, índices parciais, extensões e `GRANT/REVOKE` em arquivos SQL manuais dentro das migrações; estratégia **expandir → migrar → contrair** (RNF-INT-05); nunca editar migração já aplicada em produção. A migração-base (M0) cria `unaccent` e `pg_trgm`, tira `CREATE` do schema `public` de `PUBLIC` e concede ao papel `pdv_app` apenas `USAGE` no schema e `SELECT/INSERT/UPDATE/DELETE` (mais `USAGE/SELECT` em sequências) nas tabelas criadas depois pelo dono; ela **falha de propósito** se o papel `pdv_app` não existir. Tabelas imutáveis (`audit_log`, `stock_movements`) terão `REVOKE UPDATE, DELETE` explícito na migração que as criar.
