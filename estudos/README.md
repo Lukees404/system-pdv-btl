@@ -19,3 +19,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 11 | Playwright (esqueleto E2E) | [M0-etapa-11-playwright.md](M0-etapa-11-playwright.md) |
 | 12 | CI no GitHub Actions | [M0-etapa-12-ci.md](M0-etapa-12-ci.md) |
 | 13 | Preparação do deploy de preview | [M0-etapa-13-preparacao-do-deploy.md](M0-etapa-13-preparacao-do-deploy.md) |
+| 14 | Fechamento do marco | [M0-etapa-14-fechamento.md](M0-etapa-14-fechamento.md) |
