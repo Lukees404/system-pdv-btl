@@ -1,5 +1,6 @@
 import { SystemClock, type Clock } from '@/shared/clock';
 import { DomainError } from '@/shared/errors';
+import { isSensitiveKey } from '@/shared/pii';
 import { getEnv } from './env';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -26,41 +27,6 @@ const LEVEL_RANK: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, er
 const CORE_KEYS = new Set(['time', 'level', 'msg']);
 const REDACTED = '[REDACTED]';
 const MAX_DEPTH = 10;
-
-// Dados pessoais e segredos (RNF-LGPD-05, RNF-SEG-06). A chave é normalizada
-// (minúscula, sem separadores) e depois comparada.
-const EXACT_PII_KEYS = new Set([
-  'name',
-  'firstname',
-  'lastname',
-  'fullname',
-  'customername',
-  'tutorname',
-  'username',
-  'petname',
-]);
-const PII_KEY_PARTS = [
-  'cpf',
-  'phone',
-  'telefone',
-  'address',
-  'endereco',
-  'email',
-  'password',
-  'senha',
-  'token',
-  'authorization',
-  'cookie',
-  'secret',
-  'databaseurl',
-  'directurl',
-  'apikey',
-];
-
-function isSensitiveKey(key: string): boolean {
-  const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return EXACT_PII_KEYS.has(normalized) || PII_KEY_PARTS.some((part) => normalized.includes(part));
-}
 
 /** Remove a senha de URLs de conexão que apareçam dentro de qualquer texto. */
 function scrubText(text: string): string {
