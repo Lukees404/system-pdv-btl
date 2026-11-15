@@ -24,6 +24,11 @@ describe('decideAccess', () => {
     expect(decideAccess('/api/vendas', true)).toEqual({ type: 'allow' });
   });
 
+  it('[RNF-SEG-04] /api/auth/expired é pública: quem já perdeu o cookie ainda precisa chegar ao login', () => {
+    expect(decideAccess('/api/auth/expired', false)).toEqual({ type: 'allow' });
+    expect(decideAccess('/api/auth/expired', true)).toEqual({ type: 'allow' });
+  });
+
   it('[RNF-OBS-03] /api/health é pública de propósito (monitor de uptime), com ou sem sessão', () => {
     expect(decideAccess('/api/health', false)).toEqual({ type: 'allow' });
     expect(decideAccess('/api/health', true)).toEqual({ type: 'allow' });

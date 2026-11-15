@@ -84,6 +84,7 @@ test('[RF-AUT-03][RN-ACE-05] trocar a senha: a nova entra e a antiga não', asyn
   await expect(page.getByRole('status')).toHaveText(t('account.changePassword.success'));
 
   await page.getByRole('button', { name: t('account.logout') }).click();
+  await expect(page).toHaveURL(/\/login$/);
   await signIn(page, { email: user.email, password: user.password });
   await expect(page.locator('p[role="alert"]')).toHaveText(errorMessage('INVALID_CREDENTIALS'));
 

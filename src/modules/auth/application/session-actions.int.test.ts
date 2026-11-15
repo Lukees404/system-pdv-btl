@@ -162,8 +162,21 @@ describe('ações de sessão (banco real, cookies em memória)', () => {
 
       expect(result).toEqual({ ok: true });
       expect(await sessionCount(userId)).toBe(0);
-      expect(jar.deleteCalls).toEqual([COOKIE]);
+      const cleared = jar.setCalls.at(-1);
+      expect(cleared?.name).toBe(COOKIE);
+      expect(cleared?.value).toBe('');
+      expect(cleared?.options).toMatchObject({ httpOnly: true, path: '/', maxAge: 0 });
       expect((await currentUser(context(jar))).ok).toBe(false);
+    });
+
+    it('[RF-AUT-02][RNF-SEG-02] em produção o cookie __Host- só é apagado com Secure e Path=/ (senão o navegador o ignora)', async () => {
+      const jar = new FakeCookieJar();
+
+      await performLogout({ ...context(jar), isProduction: true });
+
+      const cleared = jar.setCalls.at(-1);
+      expect(cleared?.name).toBe('__Host-pdv_session');
+      expect(cleared?.options).toMatchObject({ secure: true, path: '/', httpOnly: true });
     });
 
     it('[RF-AUT-02] sair sem cookie não dá erro (idempotente)', async () => {
