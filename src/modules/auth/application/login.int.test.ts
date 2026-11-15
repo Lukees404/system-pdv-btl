@@ -195,4 +195,39 @@ describe('login (banco real)', () => {
     expect(output).not.toContain('Nome Que Nao Pode Vazar');
     expect(output).not.toContain('senha-errada-999');
   });
+
+  it('[RF-AUT-01] o hash de senha roda FORA da transação (não segura conexão do pool durante a CPU pesada)', async () => {
+    const { email } = await seedUser();
+    let insideTransaction = false;
+    const hashedInside: boolean[] = [];
+    const uow = {
+      run: <T>(work: Parameters<typeof kit.uow.run<T>>[0]) =>
+        kit.uow.run(async (context) => {
+          insideTransaction = true;
+          try {
+            return await work(context);
+          } finally {
+            insideTransaction = false;
+          }
+        }),
+    };
+    const hasher = {
+      hash: async (password: string) => {
+        hashedInside.push(insideTransaction);
+        return kit.hasher.hash(password);
+      },
+      verify: async (hash: string, password: string) => {
+        hashedInside.push(insideTransaction);
+        return kit.hasher.verify(hash, password);
+      },
+    };
+
+    await login({ ...loginDeps(), uow, hasher }, { email, password: PASSWORD });
+    await login(
+      { ...loginDeps(), uow, hasher },
+      { email: 'ninguem@exemplo.com', password: PASSWORD },
+    );
+
+    expect(hashedInside).toEqual([false, false]);
+  });
 });
