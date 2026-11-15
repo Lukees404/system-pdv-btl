@@ -25,6 +25,7 @@ A documentação em `docs/` manda. **Comece por `docs/README.md`.** Se código e
 2. **Planeje antes de codar** (`/plan`): liste os testes que escreverá primeiro.
 3. **TDD:** escreva o teste (citando `[RN-XXX-NN]` no título), **veja falhar**, implemente o mínimo, refatore. Bug novo = teste que reproduz antes da correção.
 4. Commits pequenos, Conventional Commits em inglês (`test(sales): ...`, `feat(sales): ...`).
+   **Branches e PRs:** a `main` é protegida (só aceita PR com o CI verde: sem push direto, sem force-push). Cada etapa/tarefa nasce numa `feature/<marco>-etapa-NN-tema` (ou `fix/...`, `docs/...`) a partir da `main` atualizada; ao terminar, `git push -u origin <branch>`, abra o PR (`gh pr create`), espere os checks e faça **squash merge** apagando a branch. Nunca conserte erro direto na `main`: abra outra branch. Migração de produção vem **antes** do merge que publica o código que depende dela.
 5. Ao terminar: Definition of Done (`docs/07 §9`), atualizar documentação afetada no mesmo PR.
 6. Ambiguidade → `docs/09`; use a suposição padrão se existir e registre no PR; senão **pergunte**, não invente regra de negócio.
 

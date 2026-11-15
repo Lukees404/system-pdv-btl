@@ -91,7 +91,17 @@ As regras completas estão em [`CLAUDE.md`](CLAUDE.md). Em resumo:
 2. **TDD.** O teste cita o ID da regra no título (`[RN-XXX-NN]`), é visto falhando e só então se implementa.
 3. **Dinheiro em centavos inteiros**, estoque como livro de movimentos, vendas e auditoria imutáveis, autorização em toda ação.
 4. **Commits pequenos** em inglês, no padrão Conventional Commits (`test(...)`, `feat(...)`, `fix(...)`, `docs(...)`).
-5. Código e identificadores em inglês; interface e documentação em pt-BR.
+5. **Branches e Pull Requests.** A `main` é protegida: só recebe PR com o CI verde (sem push direto). Cada etapa nasce numa `feature/...`, abre um PR e entra por _squash merge_:
+
+   ```powershell
+   git switch main; git pull
+   git switch -c feature/m2-etapa-03-auditoria
+   # ...commits pequenos (test, feat, docs)...
+   git push -u origin feature/m2-etapa-03-auditoria
+   gh pr create --base main      # o CI roda no PR; com tudo verde: squash merge e apagar a branch
+   ```
+
+6. Código e identificadores em inglês; interface e documentação em pt-BR.
 
 ## Segurança
 
