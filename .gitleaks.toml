@@ -1,0 +1,16 @@
+# Configuração do gitleaks (CI, job "Varredura de segredos").
+# Estende as regras padrão; só acrescenta uma exceção ESTREITA.
+
+[extend]
+useDefault = true
+
+# Senhas fictícias dos testes (ex.: 'senha-bem-longa-1') têm entropia ~3,5 e disparam a regra
+# genérica. A exceção vale só para essa regra e só para arquivos de teste; chaves reais
+# (AWS, Stripe, chave privada, tokens de provedor...) continuam sendo pegas em qualquer lugar.
+[[allowlists]]
+description = "Senhas fictícias em arquivos de teste"
+targetRules = ["generic-api-key"]
+paths = [
+  '''^src/.*\.test\.ts$''',
+  '''^tests/.*''',
+]
