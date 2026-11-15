@@ -41,43 +41,49 @@ export async function login(deps: LoginDeps, input: LoginInput): Promise<Result<
   const email = normalizeEmail(input.email);
   const now = deps.clock.now();
 
-  return deps.uow.run(async ({ users, sessions }) => {
-    const user = email.ok ? await users.findByEmail(email.value) : null;
+  // A leitura e as gravações usam transações curtas SEPARADAS: o hash (CPU pesada, ~100 ms ou
+  // mais sob carga) roda sem segurar conexão do pool, senão logins simultâneos o esgotariam.
+  // As gravações continuam seguras porque o contador é atômico e `lockUntil` nunca encurta.
+  const user = email.ok ? await deps.uow.run(({ users }) => users.findByEmail(email.value)) : null;
 
-    if (!user) {
-      await deps.hasher.hash(input.password); // mesmo custo de uma verificação
-      deps.logger?.warn('login.failed', { reason: 'unknown-user' });
-      return invalidCredentials();
-    }
+  if (!user) {
+    await deps.hasher.hash(input.password); // mesmo custo de uma verificação
+    deps.logger?.warn('login.failed', { reason: 'unknown-user' });
+    return invalidCredentials();
+  }
 
-    const passwordMatches = await deps.hasher.verify(user.passwordHash, input.password);
+  const passwordMatches = await deps.hasher.verify(user.passwordHash, input.password);
 
-    if (!user.active) {
-      deps.logger?.warn('login.failed', { userId: user.id, reason: 'inactive' });
-      return invalidCredentials();
-    }
+  if (!user.active) {
+    deps.logger?.warn('login.failed', { userId: user.id, reason: 'inactive' });
+    return invalidCredentials();
+  }
 
-    if (isLocked(user.lockedUntil, now)) {
-      deps.logger?.warn('login.failed', { userId: user.id, reason: 'locked' });
-      return err(new DomainError('ACCOUNT_LOCKED'));
-    }
+  if (isLocked(user.lockedUntil, now)) {
+    deps.logger?.warn('login.failed', { userId: user.id, reason: 'locked' });
+    return err(new DomainError('ACCOUNT_LOCKED'));
+  }
 
-    if (!passwordMatches) {
-      const failures = await users.registerFailure(user.id, now);
-      const lockedUntil = computeLockedUntil(failures, now);
-      if (lockedUntil) await users.lockUntil(user.id, lockedUntil, now);
-      deps.logger?.warn('login.failed', {
-        userId: user.id,
-        reason: 'wrong-password',
-        failures,
-        locked: lockedUntil !== null,
-      });
-      return invalidCredentials();
-    }
+  if (!passwordMatches) {
+    const { failures, lockedUntil } = await deps.uow.run(async ({ users }) => {
+      const count = await users.registerFailure(user.id, now);
+      const until = computeLockedUntil(count, now);
+      if (until) await users.lockUntil(user.id, until, now);
+      return { failures: count, lockedUntil: until };
+    });
+    deps.logger?.warn('login.failed', {
+      userId: user.id,
+      reason: 'wrong-password',
+      failures,
+      locked: lockedUntil !== null,
+    });
+    return invalidCredentials();
+  }
 
+  const token = deps.tokens.generate();
+  const expiresAt = computeSessionExpiry(now);
+  await deps.uow.run(async ({ users, sessions }) => {
     await users.resetFailures(user.id, now);
-    const token = deps.tokens.generate();
-    const expiresAt = computeSessionExpiry(now);
     await sessions.create({
       id: deps.ids.next(),
       userId: user.id,
@@ -85,7 +91,7 @@ export async function login(deps: LoginDeps, input: LoginInput): Promise<Result<
       createdAt: now,
       expiresAt,
     });
-
-    return ok({ userId: user.id, token, expiresAt });
   });
+
+  return ok({ userId: user.id, token, expiresAt });
 }
