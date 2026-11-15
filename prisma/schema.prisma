@@ -65,3 +65,66 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_log")
 }
+
+/// Categorias editáveis (RN-CAT-07). Só se exclui categoria vazia: FK RESTRICT em `products`.
+model Category {
+  id             String   @id @db.Uuid
+  name           String
+  /// Gerado pela aplicação (`normalizeText`); único. O CHECK da migração exige não vazio.
+  nameNormalized String   @unique @map("name_normalized")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  products Product[]
+
+  @@map("categories")
+}
+
+/// Produtos nunca são excluídos: arquivam (RN-CAT-04); a migração revoga DELETE do `pdv_app`.
+/// CHECKs (preço/custo/estoque ≥ 0, nome 1–120, formatos fiscais), o índice ÚNICO PARCIAL do nome
+/// entre ativos (RN-CAT-02) e o GIN trigram (ADR-020) ficam em SQL manual na migração.
+/// `stockQty` é cache: só o módulo `inventory` (M3) o escreve (ADR-007).
+model Product {
+  id             String    @id @db.Uuid
+  name           String
+  nameNormalized String    @map("name_normalized")
+  /// Opcional; único entre TODOS os produtos, inclusive arquivados (RN-CAT-03).
+  barcode        String?   @unique
+  categoryId     String?   @map("category_id") @db.Uuid
+  priceCents     Int       @map("price_cents")
+  costCents      Int?      @map("cost_cents")
+  stockQty       Int       @default(0) @map("stock_qty")
+  minStock       Int       @default(0) @map("min_stock")
+  /// Chave no armazenamento de arquivos (foto: M10).
+  photoKey       String?   @map("photo_key")
+  ncm            String?   @db.Char(8)
+  cest           String?   @db.Char(7)
+  cfop           String?   @db.Char(4)
+  csosn          String?   @db.Char(3)
+  origin         Int?      @db.SmallInt
+  unit           String    @default("UN") @db.Char(2)
+  archivedAt     DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+/// Serviços não têm estoque nem custo (RN-SER-05/07). No máximo UMA taxa de deslocamento
+/// (índice único parcial na migração, RN-SER-03). Nunca excluídos: arquivam (RN-CAT-04).
+model Service {
+  id                String    @id @db.Uuid
+  name              String
+  nameNormalized    String    @map("name_normalized")
+  priceCents        Int       @map("price_cents")
+  isDisplacementFee Boolean   @default(false) @map("is_displacement_fee")
+  fiscalServiceCode String?   @map("fiscal_service_code")
+  archivedAt        DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("services")
+}
