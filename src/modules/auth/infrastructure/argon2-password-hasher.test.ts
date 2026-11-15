@@ -39,7 +39,13 @@ describe('Argon2PasswordHasher', () => {
     expect(await hasher.verify(hash, password)).toBe(true);
   });
 
-  it.each(['', 'lixo', '$argon2id$', '$argon2id$v=19$m=19456,t=2,p=1$curto$curto', '$2b$10$naoeargon'])(
+  it.each([
+    '',
+    'lixo',
+    '$argon2id$',
+    '$argon2id$v=19$m=19456,t=2,p=1$curto$curto',
+    '$2b$10$naoeargon',
+  ])(
     '[RN-ACE-05] hash corrompido ou de outro formato → false, nunca exceção: "%s"',
     async (corrupted) => {
       await expect(hasher.verify(corrupted, 'qualquer-senha-123')).resolves.toBe(false);
