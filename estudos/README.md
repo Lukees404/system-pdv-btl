@@ -23,3 +23,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | M1·0 | Documentos primeiro | [M1-etapa-00-documentos-primeiro.md](M1-etapa-00-documentos-primeiro.md) |
 | M1·1 | `shared/pii` e dependências | [M1-etapa-01-shared-pii-e-dependencias.md](M1-etapa-01-shared-pii-e-dependencias.md) |
 | M1·2 | Tabelas `users`, `sessions` e `audit_log` | [M1-etapa-02-tabelas-e-migracao.md](M1-etapa-02-tabelas-e-migracao.md) |
+| M1·3 | Módulo `audit` | [M1-etapa-03-modulo-audit.md](M1-etapa-03-modulo-audit.md) |
