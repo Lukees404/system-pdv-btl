@@ -23,7 +23,7 @@ Fatos da documentação do Supabase (consultada em 14/11/2026):
 | Supavisor, modo **session**                    | `aws-0-<região>.pooler.supabase.com:5432`         | IPv4                  | **migrações** (`DIRECT_URL`, só no terminal)         |
 | Supavisor, modo **transaction**                | `aws-0-<região>.pooler.supabase.com:6543`         | IPv4                  | **aplicação** (`DATABASE_URL`, serverless)           |
 
-No painel, o _Session pooler_ aparece em **Connect → Direct** (lista de método) ou em **Connect → ORM → Prisma**. O host do projeto executado é `aws-1-sa-east-1.pooler.supabase.com` (o número `0`/`1` depende do projeto: copie do painel). O usuário no pooler tem o formato `<papel>.<project-ref>` (ex.: `pdv_app.<ref>`). O modo _transaction_ **não suporta _prepared statements_**: o driver `pg` não usa nomeados por padrão, mas **(validar)** que o adapter do Prisma funciona assim; se o health falhar por isso, usar temporariamente o modo _session_ (5432) com pool pequeno.
+No painel, o _Session pooler_ aparece em **Connect → Direct** (lista de método) ou em **Connect → ORM → Prisma**. O host do projeto executado é `aws-1-sa-east-1.pooler.supabase.com` (o número `0`/`1` depende do projeto: copie do painel). O usuário no pooler tem o formato `<papel>.<project-ref>` (ex.: `pdv_app.<ref>`). O modo _transaction_ **não suporta _prepared statements_**: o driver `pg` não usa nomeados por padrão. **Validado em 15/11/2026:** o adapter `pg` do Prisma funciona no modo _transaction_ (porta 6543); o `/api/health` respondeu 200 com banco. Se um dia falhar por isso, usar temporariamente o modo _session_ (5432) com pool pequeno.
 
 ## 2. Supabase: papéis (privilégio mínimo, RNF-SEG-07)
 
@@ -67,7 +67,7 @@ A migração é um passo **manual e controlado** (RNF-OPS-02), nunca automático
 ## 4. Vercel: projeto
 
 1. _Add New → Project_, importar o repositório do GitHub (Framework: Next.js, detectado sozinho; instalação com o `pnpm-lock.yaml`).
-2. _Node.js Version_: 24.x (igual ao `.nvmrc`).
+2. _Node.js Version_: 24.x (igual ao `.nvmrc`). _Settings → Functions → Function Region_: **São Paulo (`gru1`)**, junto do banco; o padrão é `iad1` (Washington), que adiciona uma viagem pelos EUA a cada consulta. *(Pendente em 15/11/2026.)*
 3. Variáveis de ambiente (_Settings → Environment Variables_, marcar como **Sensitive**), em _Preview_ e _Production_:
 
 | Variável       | Valor                                                                                         |
@@ -85,6 +85,11 @@ A migração é um passo **manual e controlado** (RNF-OPS-02), nunca automático
 - Esperado em `/api/health`: HTTP 200 e `{"status":"ok","db":"up"}`.
 - Se vier **503**: abra _Runtime Logs_ na Vercel. O log é JSON e traz o motivo (por exemplo `INVALID_ENV` com os **nomes** das variáveis que faltam, ou o erro de conexão já sem senha).
 - Conferir que a resposta não expõe nada além de `status` e `db`.
+- **Lições da execução de 15/11/2026:**
+  - Variáveis de ambiente só valem para deploys feitos **depois** de cadastradas: após criar ou alterar, faça _Redeploy_. Sem `DATABASE_URL`, o health responde 503 e o log mostra `INVALID_ENV` com `variables: ["DATABASE_URL"]`.
+  - Ao colar a URL na Vercel, confira que o valor **não** contém `$q` escrito: o `$q` só vira a senha quando o PowerShell executa o `Set-Clipboard`. Use o ícone de olho para conferir antes de salvar.
+  - O pooler pode recusar a primeira conexão logo depois de um `ALTER ROLE` (cache da senha antiga); uma nova tentativa funciona.
+  - A proteção de deploy da Vercel (`ssoProtection`) está ligada em todos os domínios `*.vercel.app`: visitantes anônimos veem a tela de login da Vercel. Para um monitor de uptime, usar o _protection bypass_ ou um domínio próprio (M10).
 
 ## 6. Antes da primeira tabela (M1)
 

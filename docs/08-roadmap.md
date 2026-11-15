@@ -6,7 +6,7 @@ Marcos pequenos, cada um **testável e utilizável**. Tamanho: `S` pequeno, `M` 
 
 | Marco | Nome | Tam. | Status |
 |---|---|---|---|
-| M0 | Fundação | M | ◐ código e CI concluídos; pendente: deploy de preview (ver "Execução do M0") |
+| M0 | Fundação | M | ☑ concluído em 15/11/2026 (ver "Execução do M0") |
 | M1 | Autenticação e auditoria | M | ☐ |
 | M2 | Catálogo (categorias, produtos, serviços) | M | ☐ |
 | M3 | Estoque (livro de movimentos) | M | ☐ |
@@ -34,7 +34,8 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 **Execução do M0 (14/11/2026):**
 - **Feito e verificado:** tudo do escopo, exceto o que está em "Pendentes". Em clone limpo com Postgres novo, a sequência do CI passa (unitários, integração, build, E2E, auditoria).
 - **CI no GitHub (15/11/2026):** repositório criado e `main` publicada; o workflow rodou e ficou **verde** no commit `42aaade` (verify, windows-unit, audit, secrets e e2e). A primeira execução falhou no `format:check` porque o `README.md` criado pelo GitHub não terminava com quebra de linha; corrigido.
-- **Pendente (depende de contas externas):** deploy de preview em Vercel + Supabase, conforme `docs/runbooks/deploy-preview.md`. O M0 só vira ☑ com o preview respondendo `/api/health` com banco.
+- **Deploy (15/11/2026):** Supabase (`sa-east-1`, Postgres 17) migrado e Vercel (`system-pdv-btl`) no ar; `GET /api/health` respondeu **200 `{"status":"ok","db":"up"}`** no deploy de produção (branch `main`) e o CI está verde no commit `233ea28`. A conferência foi feita no deploy de produção; o ambiente *Preview* usa a mesma configuração, mas não foi testado separadamente.
+- **Ajustes pendentes (não bloqueiam o marco):** definir a região das funções da Vercel como São Paulo (`gru1`; hoje `iad1`) e decidir no M2 o schema das extensões (aviso do advisor do Supabase). Ver `docs/runbooks/deploy-preview.md`.
 - **Desvios do escopo original:** as extensões `unaccent`/`pg_trgm` foram criadas já na migração-base do M0 (o M2 apenas as usa); `RN-DIN-04` (total > 0) não tem teste no M0, porque é regra da venda e entra no M7; Prisma fixado em 7.10.1 (a tag `latest` do CLI aponta para um RC); `DIRECT_URL` é opcional no servidor.
 - **Cobertura de regras no fim do M0:** `check:traceability` mostra 4 de 154 (`RN-DIN-01`, `02`, `03`, `05`).
 
