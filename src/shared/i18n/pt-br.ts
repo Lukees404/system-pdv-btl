@@ -13,6 +13,8 @@ export const errorMessages: Record<ErrorCode, string> = {
   AUDIT_PII_FORBIDDEN: 'A auditoria não pode registrar dados pessoais.',
   WEAK_PASSWORD: 'A senha deve ter entre 10 e 128 caracteres.',
   INVALID_EMAIL: 'Informe um e-mail válido.',
+  INVALID_NAME: 'Informe o nome, com até 100 caracteres.',
+  EMAIL_TAKEN: 'Já existe um usuário com este e-mail.',
 };
 
 export const messages = {

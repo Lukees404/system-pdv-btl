@@ -32,10 +32,16 @@ describe('createUser (banco real)', () => {
       active: boolean;
       password_hash: string;
       failed_attempts: number;
-    }>('SELECT id, email, role, active, password_hash, failed_attempts FROM users WHERE email = $1', [
-      'novo@exemplo.com',
-    ]);
-    expect(row).toMatchObject({ email: 'novo@exemplo.com', role: 'OWNER', active: true, failed_attempts: 0 });
+    }>(
+      'SELECT id, email, role, active, password_hash, failed_attempts FROM users WHERE email = $1',
+      ['novo@exemplo.com'],
+    );
+    expect(row).toMatchObject({
+      email: 'novo@exemplo.com',
+      role: 'OWNER',
+      active: true,
+      failed_attempts: 0,
+    });
     expect(row?.password_hash).toMatch(/^\$argon2id\$/);
     expect(row?.password_hash).not.toContain('senha-bem-longa-1');
     expect(result.ok && result.value.id).toBe(row?.id);
@@ -49,11 +55,22 @@ describe('createUser (banco real)', () => {
     });
 
     const id = result.ok ? result.value.id : '';
-    const [audit] = await kit.owner<{ action: string; entity_type: string; entity_id: string; user_id: string | null; data: unknown }>(
+    const [audit] = await kit.owner<{
+      action: string;
+      entity_type: string;
+      entity_id: string;
+      user_id: string | null;
+      data: unknown;
+    }>(
       "SELECT action, entity_type, entity_id, user_id, data FROM audit_log WHERE action = 'user.created' AND entity_id = $1",
       [id],
     );
-    expect(audit).toMatchObject({ action: 'user.created', entity_type: 'user', entity_id: id, user_id: null });
+    expect(audit).toMatchObject({
+      action: 'user.created',
+      entity_type: 'user',
+      entity_id: id,
+      user_id: null,
+    });
     const serialized = JSON.stringify(audit);
     expect(serialized).not.toContain('auditada@exemplo.com');
     expect(serialized).not.toContain('Joana');
@@ -82,8 +99,13 @@ describe('createUser (banco real)', () => {
   });
 
   it('[RN-ACE-01] e-mail repetido (mesmo com maiúsculas ou espaços) → EMAIL_TAKEN, sem segundo usuário nem auditoria', async () => {
-    await createUser(deps(), { name: 'Primeiro', email: 'repetido@exemplo.com', password: 'senha-bem-longa-5' });
-    const auditsBefore = (await kit.owner("SELECT 1 FROM audit_log WHERE action = 'user.created'")).length;
+    await createUser(deps(), {
+      name: 'Primeiro',
+      email: 'repetido@exemplo.com',
+      password: 'senha-bem-longa-5',
+    });
+    const auditsBefore = (await kit.owner("SELECT 1 FROM audit_log WHERE action = 'user.created'"))
+      .length;
 
     const again = await createUser(deps(), {
       name: 'Segundo',
@@ -93,7 +115,9 @@ describe('createUser (banco real)', () => {
 
     expect(!again.ok && again.error.code).toBe('EMAIL_TAKEN');
     expect(await countUsers('repetido@exemplo.com')).toBe(1);
-    expect((await kit.owner("SELECT 1 FROM audit_log WHERE action = 'user.created'")).length).toBe(auditsBefore);
+    expect((await kit.owner("SELECT 1 FROM audit_log WHERE action = 'user.created'")).length).toBe(
+      auditsBefore,
+    );
   });
 
   it('[RN-ACE-01] duas criações simultâneas com o mesmo e-mail: exatamente uma vence, a outra recebe EMAIL_TAKEN', async () => {
@@ -109,9 +133,21 @@ describe('createUser (banco real)', () => {
 
   it.each([
     ['senha curta', { name: 'A', email: 'fraca@exemplo.com', password: 'curta' }, 'WEAK_PASSWORD'],
-    ['e-mail inválido', { name: 'A', email: 'sem-arroba', password: 'senha-bem-longa-8' }, 'INVALID_EMAIL'],
-    ['nome vazio', { name: '   ', email: 'semnome@exemplo.com', password: 'senha-bem-longa-9' }, 'INVALID_NAME'],
-    ['nome longo demais', { name: 'x'.repeat(101), email: 'longo@exemplo.com', password: 'senha-bem-longa-10' }, 'INVALID_NAME'],
+    [
+      'e-mail inválido',
+      { name: 'A', email: 'sem-arroba', password: 'senha-bem-longa-8' },
+      'INVALID_EMAIL',
+    ],
+    [
+      'nome vazio',
+      { name: '   ', email: 'semnome@exemplo.com', password: 'senha-bem-longa-9' },
+      'INVALID_NAME',
+    ],
+    [
+      'nome longo demais',
+      { name: 'x'.repeat(101), email: 'longo@exemplo.com', password: 'senha-bem-longa-10' },
+      'INVALID_NAME',
+    ],
   ])('[RF-AUT-04] %s é recusado e nada é gravado', async (_label, input, code) => {
     const result = await createUser(deps(), input);
 

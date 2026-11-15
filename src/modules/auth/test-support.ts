@@ -1,11 +1,7 @@
 import { createDb } from '@/lib/db';
 import { FakeClock } from '@/shared/clock';
 import { FakeIdGenerator } from '@/shared/ids';
-import {
-  createIsolatedDatabase,
-  query,
-  type IsolatedDatabase,
-} from '../../../tests/helpers/db';
+import { createIsolatedDatabase, query, type IsolatedDatabase } from '../../../tests/helpers/db';
 import { Argon2PasswordHasher } from './infrastructure/argon2-password-hasher';
 import { FakePasswordHasher } from './infrastructure/fake-password-hasher';
 import { FakeSessionTokens } from './infrastructure/fake-session-tokens';

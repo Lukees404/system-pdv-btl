@@ -12,6 +12,8 @@ export const ERROR_CODES = [
   'AUDIT_PII_FORBIDDEN',
   'WEAK_PASSWORD',
   'INVALID_EMAIL',
+  'INVALID_NAME',
+  'EMAIL_TAKEN',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

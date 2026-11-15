@@ -1,3 +1,49 @@
+import type { AuditLog } from '@/modules/audit';
+
+export type UserRecord = {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  role: string;
+  active: boolean;
+  failedAttempts: number;
+  lockedUntil: Date | null;
+};
+
+export type NewUser = {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  createdAt: Date;
+};
+
+/** Lançado pelo repositório quando o e-mail já existe (índice único); desfaz a transação. */
+export class DuplicateEmailError extends Error {
+  constructor() {
+    super('DUPLICATE_EMAIL');
+    this.name = 'DuplicateEmailError';
+  }
+}
+
+export interface UserRepository {
+  findByEmail(email: string): Promise<UserRecord | null>;
+  /** Cria um `OWNER` ativo. Lança `DuplicateEmailError` se o e-mail já existir. */
+  create(user: NewUser): Promise<void>;
+}
+
+/** Repositórios e auditoria ligados à MESMA transação do banco. */
+export type UnitOfWorkContext = {
+  users: UserRepository;
+  audit: AuditLog;
+};
+
+export interface UnitOfWork {
+  /** Roda `work` numa transação: tudo é gravado junto (commit) ou nada (se `work` lançar). */
+  run<T>(work: (context: UnitOfWorkContext) => Promise<T>): Promise<T>;
+}
+
 /**
  * Portas de segredos da autenticação. O hash de senha é caro de propósito; atrás de uma
  * porta, os casos de uso rodam nos testes com um hasher falso e instantâneo.
