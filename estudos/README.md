@@ -21,3 +21,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 13 | Preparação do deploy de preview | [M0-etapa-13-preparacao-do-deploy.md](M0-etapa-13-preparacao-do-deploy.md) |
 | 14 | Fechamento do marco | [M0-etapa-14-fechamento.md](M0-etapa-14-fechamento.md) |
 | M1·0 | Documentos primeiro | [M1-etapa-00-documentos-primeiro.md](M1-etapa-00-documentos-primeiro.md) |
+| M1·1 | `shared/pii` e dependências | [M1-etapa-01-shared-pii-e-dependencias.md](M1-etapa-01-shared-pii-e-dependencias.md) |
