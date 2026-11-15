@@ -51,12 +51,14 @@ describe('migrações já aplicadas', () => {
     expect(after).toHaveLength(before.length);
   }, 60_000);
 
-  it('[ADR-020] criam as extensões unaccent e pg_trgm', async () => {
-    const rows = await query<{ extname: string }>(
+  it('[ADR-020] deixam só a extensão pg_trgm, no schema ext (o unaccent foi removido no M2)', async () => {
+    const rows = await query<{ extname: string; schema: string }>(
       db.ownerUrl,
-      "SELECT extname FROM pg_extension WHERE extname IN ('unaccent', 'pg_trgm') ORDER BY extname",
+      `SELECT e.extname, n.nspname AS schema FROM pg_extension e
+       JOIN pg_namespace n ON n.oid = e.extnamespace
+       WHERE e.extname IN ('unaccent', 'pg_trgm') ORDER BY e.extname`,
     );
 
-    expect(rows.map((row) => row.extname)).toEqual(['pg_trgm', 'unaccent']);
+    expect(rows).toEqual([{ extname: 'pg_trgm', schema: 'ext' }]);
   });
 });
