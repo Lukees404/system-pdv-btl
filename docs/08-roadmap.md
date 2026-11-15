@@ -51,8 +51,8 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 - **Desvios do escopo original:** CSP com nonce entrou no M1 (decisão do dono do projeto); o gitleaks ganhou uma exceção estreita (`.gitleaks.toml`) para senhas fictícias de teste; sem fluxo de "esqueci a senha" (OQ-29).
 - **Pendências:** `changePassword` ainda faz o hash dentro da transação; região das funções da Vercel (`gru1`); extensões no schema `public` (M2).
 
-## M2 — Catálogo
-**Escopo:** RF-CAT-01…04, 06, 07 (foto = `S`, pode ir ao M10); extensões `unaccent`/`pg_trgm` (já criadas na migração-base do M0; aqui entram os índices e a busca); busca rápida; campos fiscais opcionais com validação; arquivar/reativar; auditoria de alteração de preço/custo; seed de serviços e taxa de deslocamento.
+## M2 — Catálogo · ◐ em andamento
+**Escopo:** RF-CAT-01…04, 06, 07 (foto = `S`, pode ir ao M10); extensão `pg_trgm` movida para o schema `ext` e `unaccent` removida (ADR-020 revisada: a aplicação normaliza o texto); índices e busca; busca rápida; campos fiscais opcionais com validação; arquivar/reativar; auditoria de alteração de preço/custo; seed de serviços e taxa de deslocamento.
 **Regras:** RN-CAT-01…07, RN-SER-01…03/05/07, RN-FIS-02.
 **Testes primeiro:** unicidade (nome, código de barras, taxa única), busca sem acento/parcial com 5.000 produtos (limiar RNF-DES-01), arquivados fora da busca de venda, validação de NCM/CFOP/CSOSN.
 **Saída:** catálogo completo e utilizável.

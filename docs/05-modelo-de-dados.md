@@ -1,6 +1,6 @@
 # 05 — Modelo de Dados
 
-PostgreSQL. Convenções: tabelas e colunas em `snake_case` e inglês; PK `uuid` (exceto `audit_log.id bigint`); datas `timestamptz` UTC; dinheiro em `integer` (centavos) com `CHECK`; todo registro tem `created_at`; mutáveis têm `updated_at`. Enums como `enum` do Postgres (ou `text` + `CHECK`). Extensões: `unaccent`, `pg_trgm`.
+PostgreSQL. Convenções: tabelas e colunas em `snake_case` e inglês; PK `uuid` (exceto `audit_log.id bigint`); datas `timestamptz` UTC; dinheiro em `integer` (centavos) com `CHECK`; todo registro tem `created_at`; mutáveis têm `updated_at`. Enums como `enum` do Postgres (ou `text` + `CHECK`). Extensões: apenas `pg_trgm`, no schema `ext` (ADR-020; o `unaccent` da migração-base do M0 é removido no M2). Índices que usam o operador referenciam `ext.gin_trgm_ops`.
 
 ## Diagrama (visão lógica)
 
@@ -48,10 +48,10 @@ erDiagram
 | `stock_qty` | int **`CHECK ≥ 0`** default 0 — cache, só `inventory` escreve (ADR-007) |
 | `min_stock` | int `CHECK ≥ 0` default 0 |
 | `photo_key` | text null (chave no `FileStorage`) |
-| `ncm` char(8), `cest` text, `cfop` char(4), `csosn` char(3), `origin` smallint, `unit` char(2) default `'UN'` | todos nulos, formato validado (RN-FIS-02) |
+| `ncm` char(8), `cest` char(7), `cfop` char(4), `csosn` char(3), `origin` smallint (0–8), `unit` char(2) default `'UN'` | todos nulos (exceto `unit`), formato validado por `CHECK` e pela aplicação (RN-FIS-02; CEST e origem: OQ-31) |
 | `archived_at` | timestamptz null |
 
-Índices: GIN `pg_trgm` em `name_normalized`; único em `barcode` (onde não nulo); `(category_id)`; parcial `(stock_qty, min_stock) WHERE min_stock > 0` para alerta.
+`name_normalized` é gerado pela **aplicação** (`normalizeText`), com `CHECK` de não vazio; `stock_qty` começa em 0 e no M2 ninguém o altera (o estoque inicial e os movimentos chegam no M3, OQ-30). Índices: GIN `ext.gin_trgm_ops` em `name_normalized`; único em `barcode` (onde não nulo); `(category_id)`; parcial `(stock_qty, min_stock) WHERE min_stock > 0` para alerta.
 
 ### services
 `id`, `name`, `name_normalized` (único parcial entre ativos), `price_cents` `CHECK ≥ 0`, `is_displacement_fee` bool (**único parcial** `WHERE is_displacement_fee` → no máximo uma taxa), `fiscal_service_code` text null, `archived_at`, `created_at`, `updated_at`.

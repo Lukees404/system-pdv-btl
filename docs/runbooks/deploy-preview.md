@@ -62,7 +62,7 @@ pnpm db:migrate
 Remove-Item Env:DIRECT_URL
 ```
 
-A migração é um passo **manual e controlado** (RNF-OPS-02), nunca automático no build. Confirmar depois, no SQL Editor: `SELECT extname FROM pg_extension WHERE extname IN ('unaccent','pg_trgm');` deve listar as duas.
+A migração é um passo **manual e controlado** (RNF-OPS-02), nunca automático no build. Confirmar depois, no SQL Editor: `SELECT extname FROM pg_extension WHERE extname IN ('unaccent','pg_trgm');` deve listar as duas (até a migração do M2; depois dela, só `pg_trgm`, no schema `ext`).
 
 ## 4. Vercel: projeto
 
@@ -119,7 +119,7 @@ Se algo der errado no passo 3, o _rollback_ do código na Vercel é seguro: as t
 
 ## 8. Pendências conhecidas
 
-- **Extensões no schema `public`:** o _advisor_ de segurança do Supabase avisa (`WARN`, `extension_in_public`) que `unaccent` e `pg_trgm` estão em `public`. Decidir no M2, ao construir a busca (ADR-020), se uma migração nova as move para um schema próprio (`ALTER EXTENSION … SET SCHEMA`), pois isso afeta como índices e consultas as referenciam. Não editar a migração-base já aplicada.
+- **Extensões no schema `public`:** o _advisor_ de segurança do Supabase avisa (`WARN`, `extension_in_public`) que `unaccent` e `pg_trgm` estão em `public`. **Decidido no M2 (ADR-020):** uma migração nova cria o schema `ext`, move o `pg_trgm` para lá e remove o `unaccent` (não usado); o aviso deve sumir depois de migrar a produção. Plano B: manter o `pg_trgm` em `public` e remover só o `unaccent`. Não editar a migração-base já aplicada.
 - `changePassword` faz o hash dentro da transação (o `login` já não faz); revisar se o uso crescer.
 - Domínio próprio e alertas de uptime (M10).
 - Backup, exportação e teste de restauração (RNF-BKP, M10).

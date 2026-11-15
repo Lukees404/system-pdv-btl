@@ -62,7 +62,8 @@ Formato: **Status · Contexto · Decisão · Consequências · Alternativas desc
 **Decisão:** Server Actions apenas: validar entrada → verificar sessão/autorização → chamar **caso de uso** → mapear `Result`. Nenhuma regra de negócio na action nem em componente. Route handlers para `/api/health`, exportações (CSV/PDF) e webhooks (Fase 2).
 
 ### ADR-020 — Busca de produtos
-**Decisão:** colunas normalizadas (`unaccent` + minúsculas) com índice `pg_trgm` (GIN) para busca parcial tolerante; código de barras com índice único. Habilitar extensões `unaccent` e `pg_trgm` por migração.
+**Decisão:** a aplicação normaliza o texto (função pura `normalizeText` em `shared`: NFD sem marcas combinantes, minúsculas, espaços colapsados) e grava o resultado em `name_normalized`; o termo buscado passa pela **mesma** função. A busca é `name_normalized ILIKE '%termo%'` com índice GIN `gin_trgm_ops` (`pg_trgm`) para busca parcial tolerante; código de barras com índice único. Ordem dos resultados: código de barras exato, nome que começa com o termo, posição do termo, nome mais curto.
+**Extensões (revisão do M2, 15/11/2026):** só `pg_trgm` é necessária, e fica num schema próprio (`ext`), não em `public`. O `unaccent` do Postgres é `STABLE` (não serve em índice nem em coluna gerada) e duplicaria a regra de normalização; por isso é **removido**. A migração do M2 cria `ext`, move o `pg_trgm` e remove o `unaccent`, o que também encerra o aviso `extension_in_public` do Supabase. Plano B se o `ALTER EXTENSION` falhar no Supabase: manter o `pg_trgm` em `public` e remover só o `unaccent`.
 
 ## Estrutura de pastas
 

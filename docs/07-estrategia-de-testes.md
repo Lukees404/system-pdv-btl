@@ -40,7 +40,7 @@ Onde TDD estrito **não** se aplica: estilo visual, layout, textos e código de 
 - Isolamento: cada arquivo de teste de integração roda sobre **esquema isolado** ou limpa as tabelas entre testes (`TRUNCATE … RESTART IDENTITY CASCADE`), sem dependência de ordem. *Implementado no M0:* um **banco isolado por arquivo** (`createIsolatedDatabase` em `tests/helpers/db.ts`, criado e apagado pelo próprio teste) e `truncateAll` para limpar entre testes quando o banco for compartilhado dentro do arquivo.
 - Factories em `tests/helpers` criam estados válidos mínimos (`aProduct()`, `anOpenCashSession()`, `aCompletedSale()`), com *overrides* explícitos.
 - O usuário do banco usado pela aplicação nos testes tem **os mesmos privilégios mínimos** da produção (valida RNF-SEG-07).
-- Extensões (`unaccent`, `pg_trgm`) e índices parciais vêm das migrações — o teste de integração garante que existem.
+- A extensão `pg_trgm` (schema `ext`; o `unaccent` foi removido no M2) e os índices parciais vêm das migrações — o teste de integração garante que existem e que o índice trigram é usado na busca.
 
 ## 5. Convenções
 
