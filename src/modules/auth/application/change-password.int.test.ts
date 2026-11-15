@@ -217,6 +217,22 @@ describe('changePassword (banco real)', () => {
     expect(await hashOf(victim.userId)).toBe(before);
   });
 
+  it('[RN-ACE-04][RNF-SEG-04] sessão expirada não pode trocar a senha → UNAUTHENTICATED e nada muda', async () => {
+    const { userId, tokens } = await seed(1);
+    const before = await hashOf(userId);
+    kit.clock.advance(30 * 24 * 60 * 60 * 1000); // exatamente 30 dias: a sessão expirou
+
+    const result = await changePassword(changeDeps(), {
+      userId,
+      sessionToken: tokens[0]!,
+      currentPassword: OLD,
+      newPassword: NEW,
+    });
+
+    expect(codeOf(result)).toBe('UNAUTHENTICATED');
+    expect(await hashOf(userId)).toBe(before);
+  });
+
   it('[RN-ACE-04] a troca bem-sucedida zera falhas parciais de senha', async () => {
     const { email, userId, tokens } = await seed(1);
     await login(loginDeps(), { email, password: 'errada-1234567' });

@@ -4,6 +4,7 @@ import { DomainError } from '@/shared/errors';
 import { err, ok, type Result } from '@/shared/result';
 import { computeLockedUntil, isLocked } from '../domain/lockout';
 import { PASSWORD_MAX_LENGTH, validatePassword } from '../domain/password-policy';
+import { isSessionExpired } from '../domain/session-expiry';
 import type { PasswordHasher, SessionTokens, UnitOfWork } from './ports';
 
 export type ChangePasswordDeps = {
@@ -40,8 +41,11 @@ export async function changePassword(
   return deps.uow.run(async ({ users, sessions, audit }) => {
     // A sessão informada precisa existir, valer e ser do próprio usuário.
     const session = await sessions.findByTokenHash(currentTokenHash);
-    const user =
-      session && session.userId === input.userId ? await users.findById(input.userId) : null;
+    const validSession =
+      session !== null &&
+      session.userId === input.userId &&
+      !isSessionExpired(session.expiresAt, now);
+    const user = validSession ? await users.findById(input.userId) : null;
     if (!user || !user.active) return err(new DomainError('UNAUTHENTICATED'));
 
     if (isLocked(user.lockedUntil, now)) return err(new DomainError('ACCOUNT_LOCKED'));
