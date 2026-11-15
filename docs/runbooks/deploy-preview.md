@@ -95,9 +95,30 @@ A migração é um passo **manual e controlado** (RNF-OPS-02), nunca automático
 
 O Supabase expõe, por padrão, uma API REST sobre o schema `public` e concede privilégios aos papéis `anon` e `authenticated` em tabelas novas. O PDV guarda dados pessoais de tutores e **não usa** essa API (ADR-005). Antes de criar tabelas: desligar a _Data API_ do projeto (ou revogar os privilégios padrão desses papéis) e rodar os _advisors_ de segurança. Registrar o resultado aqui.
 
-## 7. Pendências conhecidas
+## 7. Implantar o M1 (autenticação) em produção
+
+Ordem obrigatória; cada passo é seu, no terminal ou no painel (**senhas nunca no chat**):
+
+1. **Desligar a _Data API_ do Supabase** e rodar os _advisors_ de segurança (§6). Anotar o resultado aqui.
+2. **Migrar o banco** como `pdv_owner` (§3). A migração só adiciona `users`, `sessions` e `audit_log`: é compatível com o deploy antigo.
+3. **Publicar o código** (`git push` na `main`; a Vercel publica sozinha e o CI roda).
+4. **Criar o primeiro usuário**, com a conexão da aplicação (`pdv_app`) só na sessão do terminal:
+
+   ```powershell
+   $env:DATABASE_URL = Read-Host "DATABASE_URL (pdv_app, porta 6543)"
+   pnpm create-user --name "Nome" --email "dono@exemplo.com"
+   Remove-Item Env:DATABASE_URL
+   ```
+
+   O script pede a senha duas vezes, sem mostrar, e imprime só o ID. Uma segunda pessoa repete o comando.
+5. **Conferir:** `GET /api/health` 200; entrar; trocar a senha; sair; abrir `/conta` sem sessão e ver o login.
+
+Se algo der errado no passo 3, o _rollback_ do código na Vercel é seguro: as tabelas novas não atrapalham a versão anterior.
+
+## 8. Pendências conhecidas
 
 - **Extensões no schema `public`:** o _advisor_ de segurança do Supabase avisa (`WARN`, `extension_in_public`) que `unaccent` e `pg_trgm` estão em `public`. Decidir no M2, ao construir a busca (ADR-020), se uma migração nova as move para um schema próprio (`ALTER EXTENSION … SET SCHEMA`), pois isso afeta como índices e consultas as referenciam. Não editar a migração-base já aplicada.
+- `changePassword` faz o hash dentro da transação (o `login` já não faz); revisar se o uso crescer.
 - Domínio próprio e alertas de uptime (M10).
 - Backup, exportação e teste de restauração (RNF-BKP, M10).
 - Rotação das senhas dos papéis e o procedimento de _rollback_ (M10).

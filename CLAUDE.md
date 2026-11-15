@@ -48,6 +48,7 @@ pnpm db:up / db:down        # docker compose up -d --wait / down (Postgres 17 em
 pnpm db:migrate             # prisma migrate deploy (usa DIRECT_URL, dono do schema)
 pnpm db:migrate:dev         # prisma migrate dev (cria migração nova)
 pnpm db:generate / db:seed  # prisma generate / seed idempotente
+pnpm create-user            # cria usuário OWNER (RF-AUT-04); pede nome, e-mail e senha (oculta). Única forma de criar usuário
 ```
 
 Banco: `pdv_owner` migra (`DIRECT_URL`); a aplicação usa `pdv_app`, só DML (`DATABASE_URL`). `DIRECT_URL` é opcional no servidor. Deploy de preview: `docs/runbooks/deploy-preview.md`.

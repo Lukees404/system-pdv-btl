@@ -39,7 +39,7 @@ Ordem e dependências: `M0 → M1 → M2 → M3 → M4`; `M1 → M5`; `M1 → M6
 - **Desvios do escopo original:** as extensões `unaccent`/`pg_trgm` foram criadas já na migração-base do M0 (o M2 apenas as usa); `RN-DIN-04` (total > 0) não tem teste no M0, porque é regra da venda e entra no M7; Prisma fixado em 7.10.1 (a tag `latest` do CLI aponta para um RC); `DIRECT_URL` é opcional no servidor.
 - **Cobertura de regras no fim do M0:** `check:traceability` mostra 4 de 154 (`RN-DIN-01`, `02`, `03`, `05`).
 
-## M1 — Autenticação e auditoria
+## M1 — Autenticação e auditoria · ◐ código pronto, falta a implantação em produção
 **Escopo:** RF-AUT-01…04; módulo `audit`; tabela `users`; sessões; limitação de tentativas; script `create-user`; casca da aplicação (layout, navegação mobile/desktop); ADR-011 decidido: implementação própria (ver `04`); parâmetros de segurança em `OQ-28`. **Antes de migrar a produção:** desligar a Data API do Supabase (`docs/runbooks/deploy-preview.md` §6).
 **Regras:** RN-ACE-01…06, RNF-SEG-01…05/07.
 **Testes primeiro:** login válido/inválido, bloqueio após 5 falhas, troca de senha invalida sessões, rotas protegidas retornam 401/403, `audit_log` sem `UPDATE/DELETE`, nenhum dado pessoal em auditoria.
