@@ -51,5 +51,6 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 4 | Domínio do catálogo (regras puras) | [M2/M2-etapa-04-dominio-do-catalogo.md](M2/M2-etapa-04-dominio-do-catalogo.md) |
 | 5 | Casos de uso do catálogo (com banco real) | [M2/M2-etapa-05-casos-de-uso-do-catalogo.md](M2/M2-etapa-05-casos-de-uso-do-catalogo.md) |
 | 6 | Seed do catálogo | [M2/M2-etapa-06-seed-do-catalogo.md](M2/M2-etapa-06-seed-do-catalogo.md) |
+| 7 | Desempenho da busca | [M2/M2-etapa-07-desempenho-da-busca.md](M2/M2-etapa-07-desempenho-da-busca.md) |
 
 As próximas notas nascem na pasta do marco (`estudos/M3/`, ...), com o nome `M?-etapa-NN-tema.md`.
