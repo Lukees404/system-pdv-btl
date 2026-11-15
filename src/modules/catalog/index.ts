@@ -23,6 +23,8 @@ export { reactivateProduct } from './application/reactivate-product';
 export { reactivateService } from './application/reactivate-service';
 export { renameCategory } from './application/rename-category';
 export { searchProducts } from './application/search-products';
+export { seedCatalog } from './application/seed-catalog';
+export type { SeedCatalogInput, SeedReport } from './application/seed-catalog';
 export type { SearchProductsInput } from './application/search-products';
 export { updateProduct } from './application/update-product';
 export type { UpdateProductInput } from './application/update-product';
