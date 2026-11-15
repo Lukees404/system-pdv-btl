@@ -20,6 +20,10 @@ export const ERROR_CODES = [
   'CURRENT_PASSWORD_INCORRECT',
   'INVALID_INPUT',
   'PASSWORD_MISMATCH',
+  'INVALID_CATALOG_NAME',
+  'INVALID_MIN_STOCK',
+  'INVALID_BARCODE',
+  'INVALID_FISCAL_FIELD',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

@@ -48,5 +48,6 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | 1 | `normalizeText` e `parseMoneyInput` | [M2/M2-etapa-01-normalize-e-parse-de-preco.md](M2/M2-etapa-01-normalize-e-parse-de-preco.md) |
 | 2 | Modelo de dados e migração do catálogo | [M2/M2-etapa-02-modelo-de-dados-do-catalogo.md](M2/M2-etapa-02-modelo-de-dados-do-catalogo.md) |
 | 3 | Auditoria do catálogo | [M2/M2-etapa-03-auditoria-do-catalogo.md](M2/M2-etapa-03-auditoria-do-catalogo.md) |
+| 4 | Domínio do catálogo (regras puras) | [M2/M2-etapa-04-dominio-do-catalogo.md](M2/M2-etapa-04-dominio-do-catalogo.md) |
 
 As próximas notas nascem na pasta do marco (`estudos/M3/`, ...), com o nome `M?-etapa-NN-tema.md`.

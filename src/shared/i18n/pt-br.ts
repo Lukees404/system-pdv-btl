@@ -22,6 +22,11 @@ export const errorMessages: Record<ErrorCode, string> = {
   CURRENT_PASSWORD_INCORRECT: 'A senha atual está incorreta.',
   INVALID_INPUT: 'Confira os campos e tente novamente.',
   PASSWORD_MISMATCH: 'A confirmação não confere com a nova senha.',
+  INVALID_CATALOG_NAME: 'Informe o nome, com até 120 caracteres.',
+  INVALID_MIN_STOCK: 'O estoque mínimo deve ser um número inteiro maior ou igual a 0.',
+  INVALID_BARCODE: 'O código de barras não pode ter espaços e deve ter até 64 caracteres.',
+  INVALID_FISCAL_FIELD:
+    'Confira os campos fiscais: NCM com 8 dígitos, CEST com 7, CFOP com 4, CSOSN com 3, origem de 0 a 8 e unidade com 2 letras.',
   ACCOUNT_LOCKED:
     'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
 };
