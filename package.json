@@ -2,6 +2,7 @@
   "name": "pdv-pet-shop",
   "version": "0.1.0",
   "private": true,
+  "description": "PDV web (PWA) para pet shop com atendimentos domiciliares: catálogo, estoque, caixa e vendas",
   "engines": {
     "node": ">=22"
   },
