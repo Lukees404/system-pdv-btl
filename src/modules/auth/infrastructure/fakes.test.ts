@@ -27,6 +27,15 @@ describe('FakePasswordHasher (só para testes)', () => {
 
     expect(hasher.verifyCalls).toBe(2);
   });
+
+  it('[RN-ACE-05] conta quantos hashes foram calculados', async () => {
+    const hasher = new FakePasswordHasher();
+
+    await hasher.hash('abc1234567');
+    await hasher.hash('outra-1234567');
+
+    expect(hasher.hashCalls).toBe(2);
+  });
 });
 
 describe('FakeSessionTokens (só para testes)', () => {
