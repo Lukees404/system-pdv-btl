@@ -31,3 +31,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | M1·8 | Casca da aplicação, telas e proxy | [M1-etapa-08-casca-e-telas.md](M1-etapa-08-casca-e-telas.md) |
 | M1·9 | E2E de autenticação e acessibilidade | [M1-etapa-09-e2e-e-acessibilidade.md](M1-etapa-09-e2e-e-acessibilidade.md) |
 | M1·10 | CSP com nonce e cabeçalhos de segurança | [M1-etapa-10-csp-e-cabecalhos.md](M1-etapa-10-csp-e-cabecalhos.md) |
+| M1·11 | Script create-user e fechamento | [M1-etapa-11-create-user-e-fechamento.md](M1-etapa-11-create-user-e-fechamento.md) |
