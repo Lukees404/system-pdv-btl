@@ -11,18 +11,15 @@ import { PrismaUnitOfWork } from './infrastructure/prisma-unit-of-work';
 export class FakeCookieJar {
   readonly values = new Map<string, string>();
   readonly setCalls: { name: string; value: string; options: Record<string, unknown> }[] = [];
-  readonly deleteCalls: string[] = [];
 
   get(name: string): string | undefined {
     return this.values.get(name);
   }
   set(name: string, value: string, options: Record<string, unknown>): void {
-    this.values.set(name, value);
+    // Valor vazio = cookie apagado (como o navegador faz com um cookie vencido).
+    if (value === '') this.values.delete(name);
+    else this.values.set(name, value);
     this.setCalls.push({ name, value, options });
-  }
-  delete(name: string): void {
-    this.values.delete(name);
-    this.deleteCalls.push(name);
   }
 }
 

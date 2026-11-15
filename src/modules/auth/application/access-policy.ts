@@ -9,8 +9,8 @@ export type AccessDecision =
 
 const LOGIN_PATH = '/login';
 const HOME_PATH = '/';
-/** Públicas de propósito: o login e o health check do monitor de uptime. */
-const PUBLIC_PATHS = new Set([LOGIN_PATH, '/api/health']);
+/** Públicas de propósito: login, health check do monitor e a rota que limpa cookie de sessão morta. */
+const PUBLIC_PATHS = new Set([LOGIN_PATH, '/api/health', '/api/auth/expired']);
 
 function normalize(pathname: string): string {
   const lower = pathname.toLowerCase();

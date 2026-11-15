@@ -16,8 +16,8 @@ import { verifySession, type SessionUser } from './verify-session';
 /** Cookies que a ação lê e grava. No Next é `await cookies()`; nos testes, um fake em memória. */
 export interface CookieJar {
   get(name: string): string | undefined;
+  /** Também apaga: grava o cookie vencido, com os MESMOS atributos (o `__Host-` exige Secure). */
   set(name: string, value: string, options: SessionCookieOptions): void;
-  delete(name: string): void;
 }
 
 export type AuthServices = {
@@ -75,7 +75,7 @@ export async function performLogin(context: AuthContext, raw: unknown): Promise<
 export async function performLogout(context: AuthContext): Promise<ActionResult> {
   await logout(context.services, readToken(context));
   const cleared = expiredSessionCookie(context.isProduction);
-  context.jar.delete(cleared.name);
+  context.jar.set(cleared.name, cleared.value, cleared.options);
   return success;
 }
 

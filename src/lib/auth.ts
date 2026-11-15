@@ -21,9 +21,8 @@ async function nextCookieJar(): Promise<CookieJar> {
   const store = await cookies();
   return {
     get: (name) => store.get(name)?.value,
-    // Gravar/apagar só funciona em Server Actions e Route Handlers (o Next barra em páginas).
+    // Gravar só funciona em Server Actions e Route Handlers (o Next barra em páginas).
     set: (name, value, options) => store.set(name, value, options),
-    delete: (name) => store.delete(name),
   };
 }
 
