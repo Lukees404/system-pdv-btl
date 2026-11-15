@@ -73,7 +73,8 @@ module.exports = {
       comment: 'domain/ não usa lib/ (banco, env, logger).',
       severity: 'error',
       from: { path: '(^|/)modules/[^/]+/domain/' },
-      to: { path: '(^|/)src/lib/|(^|/)lib/' },
+      // Só a pasta `src/lib/` do projeto; um `lib/` dentro de node_modules não conta.
+      to: { path: '(^|/)src/lib/' },
     },
     {
       name: 'domain-does-not-depend-on-outer-layers',
