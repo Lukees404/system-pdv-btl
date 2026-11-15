@@ -15,6 +15,11 @@ export const errorMessages: Record<ErrorCode, string> = {
   INVALID_EMAIL: 'Informe um e-mail válido.',
   INVALID_NAME: 'Informe o nome, com até 100 caracteres.',
   EMAIL_TAKEN: 'Já existe um usuário com este e-mail.',
+  // Mesmo texto para credencial errada e conta bloqueada: não revela se o e-mail existe.
+  INVALID_CREDENTIALS:
+    'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
+  ACCOUNT_LOCKED:
+    'E-mail ou senha incorretos, ou acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
 };
 
 export const messages = {

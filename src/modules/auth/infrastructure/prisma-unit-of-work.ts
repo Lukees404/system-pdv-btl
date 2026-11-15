@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from '@/generated/prisma/client';
 import { PrismaAuditLog, type AuditLog } from '@/modules/audit';
 import type { UnitOfWork, UnitOfWorkContext } from '../application/ports';
+import { PrismaSessionRepository } from './prisma-session-repository';
 import { PrismaUserRepository } from './prisma-user-repository';
 
 export type PrismaUnitOfWorkOptions = {
@@ -19,6 +20,7 @@ export class PrismaUnitOfWork implements UnitOfWork {
     return this.db.$transaction((tx) =>
       work({
         users: new PrismaUserRepository(tx),
+        sessions: new PrismaSessionRepository(tx),
         audit: (this.options.createAudit ?? ((client) => new PrismaAuditLog(client)))(tx),
       }),
     );

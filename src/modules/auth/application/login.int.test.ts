@@ -46,7 +46,8 @@ describe('login (banco real)', () => {
     );
 
   const wrong = (email: string) => login(loginDeps(), { email, password: 'senha-errada-123' });
-  const codeOf = (result: Awaited<ReturnType<typeof login>>) => (result.ok ? null : result.error.code);
+  const codeOf = (result: Awaited<ReturnType<typeof login>>) =>
+    result.ok ? null : result.error.code;
 
   beforeAll(async () => {
     kit = await createAuthTestKit();
@@ -58,7 +59,10 @@ describe('login (banco real)', () => {
   it('[RF-AUT-01][RN-ACE-01] credenciais certas criam a sessão: token só no retorno, hash no banco, 30 dias', async () => {
     const { email, id } = await seedUser();
 
-    const result = await login(loginDeps(), { email: `  ${email.toUpperCase()} `, password: PASSWORD });
+    const result = await login(loginDeps(), {
+      email: `  ${email.toUpperCase()} `,
+      password: PASSWORD,
+    });
 
     expect(result.ok).toBe(true);
     const value = result.ok ? result.value : undefined;
@@ -171,11 +175,18 @@ describe('login (banco real)', () => {
 
   it('[RNF-LGPD-05] o log de falha traz o id do usuário, nunca e-mail, nome nem senha', async () => {
     const lines: string[] = [];
-    const logger = createLogger({ clock: kit.clock, level: 'debug', write: (line) => lines.push(line) });
+    const logger = createLogger({
+      clock: kit.clock,
+      level: 'debug',
+      write: (line) => lines.push(line),
+    });
     const { email, id } = await seedUser('Nome Que Nao Pode Vazar');
 
     await login(loginDeps({ logger }), { email, password: 'senha-errada-999' });
-    await login(loginDeps({ logger }), { email: 'fantasma@exemplo.com', password: 'senha-errada-999' });
+    await login(loginDeps({ logger }), {
+      email: 'fantasma@exemplo.com',
+      password: 'senha-errada-999',
+    });
 
     const output = lines.join('\n');
     expect(output).toContain(id);

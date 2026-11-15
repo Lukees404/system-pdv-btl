@@ -6,7 +6,7 @@ import {
   type UserRepository,
 } from '../application/ports';
 
-type UserDb = Pick<PrismaClient, 'user'>;
+type UserDb = Pick<PrismaClient, 'user' | '$executeRaw'>;
 
 export class PrismaUserRepository implements UserRepository {
   constructor(private readonly db: UserDb) {}
@@ -25,6 +25,33 @@ export class PrismaUserRepository implements UserRepository {
           lockedUntil: row.lockedUntil,
         }
       : null;
+  }
+
+  async registerFailure(userId: string, now: Date): Promise<number> {
+    // `increment` vira `SET failed_attempts = failed_attempts + 1 ... RETURNING`: atômico.
+    const row = await this.db.user.update({
+      where: { id: userId },
+      data: { failedAttempts: { increment: 1 }, updatedAt: now },
+      select: { failedAttempts: true },
+    });
+    return row.failedAttempts;
+  }
+
+  async lockUntil(userId: string, until: Date, now: Date): Promise<void> {
+    // GREATEST: se duas falhas simultâneas calculam bloqueios diferentes, o MAIOR vence,
+    // independente da ordem em que as gravações chegam ao banco.
+    await this.db.$executeRaw`
+      UPDATE users
+         SET locked_until = GREATEST(COALESCE(locked_until, ${until}::timestamptz), ${until}::timestamptz),
+             updated_at = ${now}::timestamptz
+       WHERE id = ${userId}::uuid`;
+  }
+
+  async resetFailures(userId: string, now: Date): Promise<void> {
+    await this.db.user.update({
+      where: { id: userId },
+      data: { failedAttempts: 0, lockedUntil: null, updatedAt: now },
+    });
   }
 
   async create(user: NewUser): Promise<void> {
