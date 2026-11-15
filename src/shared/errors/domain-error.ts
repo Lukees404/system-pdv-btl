@@ -9,6 +9,7 @@ export const ERROR_CODES = [
   'INVALID_PERCENT',
   'INVALID_ALLOCATION',
   'INVALID_ENV',
+  'AUDIT_PII_FORBIDDEN',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

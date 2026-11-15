@@ -42,7 +42,10 @@ describe('recordAudit', () => {
     const log = new InMemoryAuditLog();
     const data = { productId: 'p1' };
 
-    await recordAudit({ log, clock }, { userId: 'u1', action: 'user.created', entityType: 'user', data });
+    await recordAudit(
+      { log, clock },
+      { userId: 'u1', action: 'user.created', entityType: 'user', data },
+    );
     data.productId = 'alterado';
 
     expect(log.entries[0]?.data).toEqual({ productId: 'p1' });

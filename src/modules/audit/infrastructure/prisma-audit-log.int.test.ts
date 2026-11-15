@@ -25,9 +25,8 @@ describe('PrismaAuditLog (banco real)', () => {
   });
 
   const countByEntity = async (entityId: string) =>
-    (
-      await query(database.ownerUrl, 'SELECT 1 FROM audit_log WHERE entity_id = $1', [entityId])
-    ).length;
+    (await query(database.ownerUrl, 'SELECT 1 FROM audit_log WHERE entity_id = $1', [entityId]))
+      .length;
 
   it('[RN-ACE-02] grava todos os campos como pdv_app, com o horário da entrada', async () => {
     const db = createDb(database.appUrl);

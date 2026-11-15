@@ -10,6 +10,7 @@ export const errorMessages: Record<ErrorCode, string> = {
   INVALID_PERCENT: 'O percentual deve estar entre 0 e 100, com no máximo 2 casas decimais.',
   INVALID_ALLOCATION: 'Não foi possível ratear o valor entre os itens.',
   INVALID_ENV: 'A configuração do sistema está incompleta ou inválida.',
+  AUDIT_PII_FORBIDDEN: 'A auditoria não pode registrar dados pessoais.',
 };
 
 export const messages = {

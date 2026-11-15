@@ -66,7 +66,9 @@ describe('buildAuditEntry', () => {
           { userId: 'u1', action: 'user.created', entityType: 'user', data: { [key]: 'x' } },
           clock,
         ),
-      ).toThrow(expect.objectContaining({ code: 'AUDIT_PII_FORBIDDEN', details: { paths: [key] } }));
+      ).toThrow(
+        expect.objectContaining({ code: 'AUDIT_PII_FORBIDDEN', details: { paths: [key] } }),
+      );
     },
   );
 
