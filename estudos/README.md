@@ -28,3 +28,4 @@ Cada nota tem até 20 linhas: o que foi feito, por que, um termo novo, uma pergu
 | M1·5 | Hash de senha e token de sessão | [M1-etapa-05-hash-e-token.md](M1-etapa-05-hash-e-token.md) |
 | M1·6 | Casos de uso de `auth` com banco real | [M1-etapa-06-casos-de-uso-de-auth.md](M1-etapa-06-casos-de-uso-de-auth.md) |
 | M1·7 | Camada web: cookie, acesso e ações finas | [M1-etapa-07-camada-web.md](M1-etapa-07-camada-web.md) |
+| M1·8 | Casca da aplicação, telas e proxy | [M1-etapa-08-casca-e-telas.md](M1-etapa-08-casca-e-telas.md) |
