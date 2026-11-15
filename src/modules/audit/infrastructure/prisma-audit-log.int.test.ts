@@ -120,4 +120,46 @@ describe('PrismaAuditLog (banco real)', () => {
 
     expect(await countByEntity('tx-rollback')).toBe(0);
   });
+
+  it.each([
+    'product.price_changed',
+    'product.archived',
+    'product.reactivated',
+    'service.price_changed',
+    'service.archived',
+    'service.reactivated',
+  ] as const)(
+    '[RN-ACE-02][RN-CAT-05] grava a ação do catálogo %s com antes/depois em centavos (jsonb) e só ids',
+    async (action) => {
+      const entityId = `catalogo-${action}`;
+      const db = createDb(database.appUrl);
+      try {
+        await new PrismaAuditLog(db).record(
+          buildAuditEntry(
+            {
+              userId,
+              action,
+              entityType: action.split('.')[0]!,
+              entityId,
+              data: { before: { priceCents: 1000 }, after: { priceCents: 1250 } },
+            },
+            clock,
+          ),
+        );
+      } finally {
+        await db.$disconnect();
+      }
+
+      const [row] = await query<{ action: string; entity_type: string; data: unknown }>(
+        database.ownerUrl,
+        'SELECT action, entity_type, data FROM audit_log WHERE entity_id = $1',
+        [entityId],
+      );
+      expect(row).toEqual({
+        action,
+        entity_type: action.split('.')[0],
+        data: { before: { priceCents: 1000 }, after: { priceCents: 1250 } },
+      });
+    },
+  );
 });
