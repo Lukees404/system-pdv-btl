@@ -1,5 +1,9 @@
 // Prisma 7: a URL de conexão vive em prisma.config.ts, não aqui.
-// Sem models no M0; as tabelas chegam a partir do M1.
+//
+// Convenções (docs/05): tabelas e colunas em snake_case (via @map/@@map), ids `uuid` gerados
+// pela aplicação (IdGenerator injetável), datas `timestamptz` em UTC e preenchidas com o
+// `Clock` injetável (por isso sem @updatedAt). CHECKs, REVOKEs e índices que o Prisma não
+// expressa ficam em SQL manual dentro da migração.
 
 generator client {
   provider = "prisma-client"
@@ -8,4 +12,56 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id             String    @id @db.Uuid
+  name           String
+  /// Normalizado (trim + minúsculas); o CHECK da migração garante isso no banco.
+  email          String    @unique
+  passwordHash   String    @map("password_hash")
+  /// Hoje só `OWNER` (CHECK na migração). Campo existe para evolução futura (RN-ACE-01).
+  role           String    @default("OWNER")
+  active         Boolean   @default(true)
+  failedAttempts Int       @default(0) @map("failed_attempts")
+  lockedUntil    DateTime? @map("locked_until") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  sessions  Session[]
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  /// SHA-256 (hex) do token; o token em claro só existe no cookie do navegador.
+  tokenHash String   @unique @map("token_hash")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// Append-only: a migração revoga UPDATE/DELETE/TRUNCATE do papel da aplicação (RN-ACE-03).
+/// `data` nunca contém dado pessoal (RNF-LGPD-05).
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  userId     String?  @map("user_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  data       Json     @default("{}") @db.JsonB
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_log")
 }

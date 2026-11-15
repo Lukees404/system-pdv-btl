@@ -20,7 +20,11 @@ describe('esquema de autenticação e auditoria', () => {
       [email, overrides.role ?? 'OWNER', overrides.failed ?? 0],
     );
 
-  const insertSession = (userId: string, tokenHash: string, expiresSql = "now() + interval '30 days'") =>
+  const insertSession = (
+    userId: string,
+    tokenHash: string,
+    expiresSql = "now() + interval '30 days'",
+  ) =>
     query(
       db.ownerUrl,
       `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
@@ -58,7 +62,12 @@ describe('esquema de autenticação e auditoria', () => {
         `INSERT INTO users (id, name, email, password_hash, created_at, updated_at)
          VALUES (gen_random_uuid(), 'Padrao', 'padrao@exemplo.test', 'hash', now(), now())`,
       );
-      const [row] = await query<{ failed_attempts: number; active: boolean; locked_until: Date | null; role: string }>(
+      const [row] = await query<{
+        failed_attempts: number;
+        active: boolean;
+        locked_until: Date | null;
+        role: string;
+      }>(
         db.ownerUrl,
         "SELECT failed_attempts, active, locked_until, role FROM users WHERE email = 'padrao@exemplo.test'",
       );
@@ -72,7 +81,10 @@ describe('esquema de autenticação e auditoria', () => {
          VALUES (gen_random_uuid(), 'App', 'app@exemplo.test', 'hash', now(), now())`,
       );
 
-      await query(db.appUrl, "UPDATE users SET failed_attempts = failed_attempts + 1 WHERE email = 'app@exemplo.test'");
+      await query(
+        db.appUrl,
+        "UPDATE users SET failed_attempts = failed_attempts + 1 WHERE email = 'app@exemplo.test'",
+      );
       const [row] = await query<{ failed_attempts: number }>(
         db.appUrl,
         "SELECT failed_attempts FROM users WHERE email = 'app@exemplo.test'",
@@ -86,7 +98,9 @@ describe('esquema de autenticação e auditoria', () => {
       const [user] = await insertUser('sessao-unica@exemplo.test');
       await insertSession(user!.id, 'hash-repetido');
 
-      await expect(insertSession(user!.id, 'hash-repetido')).rejects.toMatchObject({ code: '23505' });
+      await expect(insertSession(user!.id, 'hash-repetido')).rejects.toMatchObject({
+        code: '23505',
+      });
     });
 
     it('[RN-ACE-04] a sessão exige um usuário existente', async () => {
@@ -98,7 +112,9 @@ describe('esquema de autenticação e auditoria', () => {
     it('[RN-ACE-04] expires_at precisa ser posterior a created_at', async () => {
       const [user] = await insertUser('expira@exemplo.test');
 
-      await expect(insertSession(user!.id, 'hash-expirado', "now() - interval '1 day'")).rejects.toMatchObject({
+      await expect(
+        insertSession(user!.id, 'hash-expirado', "now() - interval '1 day'"),
+      ).rejects.toMatchObject({
         code: '23514',
       });
     });
@@ -107,7 +123,9 @@ describe('esquema de autenticação e auditoria', () => {
       const [user] = await insertUser('restrito@exemplo.test');
       await insertSession(user!.id, 'hash-restrito');
 
-      await expect(query(db.ownerUrl, 'DELETE FROM users WHERE id = $1', [user!.id])).rejects.toMatchObject({
+      await expect(
+        query(db.ownerUrl, 'DELETE FROM users WHERE id = $1', [user!.id]),
+      ).rejects.toMatchObject({
         code: '23503',
       });
     });
@@ -123,7 +141,9 @@ describe('esquema de autenticação e auditoria', () => {
       );
       await query(db.appUrl, "DELETE FROM sessions WHERE token_hash = 'hash-app'");
 
-      expect(await query(db.ownerUrl, "SELECT 1 FROM sessions WHERE token_hash = 'hash-app'")).toHaveLength(0);
+      expect(
+        await query(db.ownerUrl, "SELECT 1 FROM sessions WHERE token_hash = 'hash-app'"),
+      ).toHaveLength(0);
     });
 
     it('[RNF-INT-02] existe índice por user_id (apagar sessões de um usuário é frequente)', async () => {
@@ -147,11 +167,17 @@ describe('esquema de autenticação e auditoria', () => {
 
     it('[RN-ACE-03][RNF-SEG-07] a aplicação insere e lê, mas NÃO consegue UPDATE, DELETE nem TRUNCATE', async () => {
       const [row] = await appInsert();
-      const rows = await query(db.appUrl, 'SELECT 1 FROM audit_log WHERE id = $1::bigint', [row!.id]);
+      const rows = await query(db.appUrl, 'SELECT 1 FROM audit_log WHERE id = $1::bigint', [
+        row!.id,
+      ]);
       expect(rows).toHaveLength(1);
 
-      await expect(query(db.appUrl, "UPDATE audit_log SET action = 'x'")).rejects.toMatchObject({ code: '42501' });
-      await expect(query(db.appUrl, 'DELETE FROM audit_log')).rejects.toMatchObject({ code: '42501' });
+      await expect(query(db.appUrl, "UPDATE audit_log SET action = 'x'")).rejects.toMatchObject({
+        code: '42501',
+      });
+      await expect(query(db.appUrl, 'DELETE FROM audit_log')).rejects.toMatchObject({
+        code: '42501',
+      });
       await expect(query(db.appUrl, 'TRUNCATE audit_log')).rejects.toMatchObject({ code: '42501' });
     });
 
@@ -165,7 +191,7 @@ describe('esquema de autenticação e auditoria', () => {
       );
       const [row] = await query<{ data: unknown }>(
         db.ownerUrl,
-        "SELECT data FROM audit_log WHERE entity_id IS NULL ORDER BY id DESC LIMIT 1",
+        'SELECT data FROM audit_log WHERE entity_id IS NULL ORDER BY id DESC LIMIT 1',
       );
       expect(row?.data).toEqual({});
     });
