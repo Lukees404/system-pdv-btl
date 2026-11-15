@@ -50,6 +50,7 @@ export async function getAuthContext(): Promise<AuthContext> {
  */
 export const requireUser = cache(async () => {
   const result = await currentUser(await getAuthContext());
-  if (!result.ok) redirect('/login');
+  // Passa por uma rota que apaga o cookie velho; ir direto a /login causaria laço com o proxy.
+  if (!result.ok) redirect('/api/auth/expired');
   return result.value;
 });
