@@ -31,6 +31,19 @@ export type { UpdateProductInput } from './application/update-product';
 export { updateService } from './application/update-service';
 export type { UpdateServiceInput } from './application/update-service';
 
+// Camada de ação das telas (a sessão é verificada por quem chama, na cola do app)
+export {
+  formFailure,
+  performCreateCategory,
+  performDeleteCategory,
+  performRenameCategory,
+  performSaveProduct,
+  performSaveService,
+  performSetProductArchived,
+  performSetServiceArchived,
+} from './application/form-actions';
+export type { ActionContext, FormActionResult } from './application/form-actions';
+
 // Portas e tipos
 export type { CatalogDeps } from './application/deps';
 export type {
