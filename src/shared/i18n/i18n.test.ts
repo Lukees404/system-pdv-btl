@@ -27,7 +27,7 @@ describe('catálogo de textos da interface', () => {
   it('[RNF-USA-03] os únicos marcadores {…} usados são os previstos', () => {
     const placeholders = Object.values(messages).flatMap((text) => text.match(/\{\w+\}/g) ?? []);
 
-    expect(new Set(placeholders)).toEqual(new Set(['{name}']));
+    expect(new Set(placeholders)).toEqual(new Set(['{name}', '{qty}']));
   });
 
   it('[RNF-USA-03] as telas de login e de conta têm todos os textos que usam', () => {

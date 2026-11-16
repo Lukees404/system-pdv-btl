@@ -4,9 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { t } from '@/shared/i18n';
 
-// Só as telas que já existem; Venda, Caixa, Produtos e Clientes entram com os seus marcos (ADR-017).
+// Só as telas que já existem; Venda, Caixa e Clientes entram com os seus marcos (ADR-017).
 const ITEMS = [
   { href: '/', label: t('nav.home') },
+  { href: '/produtos', label: t('nav.products') },
+  { href: '/servicos', label: t('nav.services') },
+  { href: '/categorias', label: t('nav.categories') },
   { href: '/conta', label: t('nav.account') },
 ] as const;
 
