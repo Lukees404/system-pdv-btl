@@ -124,7 +124,9 @@ describe('ações de formulário do catálogo (banco real)', () => {
       field: 'name',
     });
 
-    const [cat] = await kit.owner<{ id: string }>("SELECT id FROM categories WHERE name = 'Alimentos'");
+    const [cat] = await kit.owner<{ id: string }>(
+      "SELECT id FROM categories WHERE name = 'Alimentos'",
+    );
     const id = cat!.id;
     expect((await performRenameCategory(ctx, { id, name: 'Comida' })).ok).toBe(true);
 
@@ -146,9 +148,13 @@ describe('ações de formulário do catálogo (banco real)', () => {
       await performSaveService(ctx, { name: 'Outra taxa', price: '1,00', isDisplacementFee: 'on' }),
     ).toMatchObject({ ok: false, code: 'DISPLACEMENT_FEE_EXISTS' });
 
-    const [svc] = await kit.owner<{ id: string }>("SELECT id FROM services WHERE name = 'Consulta'");
+    const [svc] = await kit.owner<{ id: string }>(
+      "SELECT id FROM services WHERE name = 'Consulta'",
+    );
     const id = svc!.id;
-    expect((await performSaveService(ctx, { id, name: 'Consulta', price: '100,00' })).ok).toBe(true);
+    expect((await performSaveService(ctx, { id, name: 'Consulta', price: '100,00' })).ok).toBe(
+      true,
+    );
     const audit = await kit.owner(
       "SELECT 1 FROM audit_log WHERE action = 'service.price_changed' AND entity_id = $1",
       [id],
@@ -160,10 +166,15 @@ describe('ações de formulário do catálogo (banco real)', () => {
   });
 
   it('[RNF-SEG-05] id que não é texto ou estrutura inesperada vira INVALID_INPUT', async () => {
-    expect(await performSetProductArchived(ctx, { id: 5 as unknown as string, archived: true })).toMatchObject({
+    expect(
+      await performSetProductArchived(ctx, { id: 5 as unknown as string, archived: true }),
+    ).toMatchObject({
       ok: false,
       code: 'INVALID_INPUT',
     });
-    expect(await performRenameCategory(ctx, null)).toMatchObject({ ok: false, code: 'INVALID_INPUT' });
+    expect(await performRenameCategory(ctx, null)).toMatchObject({
+      ok: false,
+      code: 'INVALID_INPUT',
+    });
   });
 });
